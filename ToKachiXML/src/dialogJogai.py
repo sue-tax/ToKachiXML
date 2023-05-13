@@ -1,0 +1,203 @@
+'''
+Created on 2022/10/25
+
+@author: sue-t
+'''
+
+from tkinter import Toplevel, Button, Label, Entry, \
+        W, N, IntVar, Spinbox
+from tkinter.ttk import Combobox
+
+import c
+import d
+import e
+import config
+from TransNum import TransNum
+
+
+class DialogJogai(object):
+    '''
+    前条第二項などのハイパーリンクを
+    自分で設定するための入力するダイアログ
+    '''
+
+    def __init__(self):
+        self.dialog = Toplevel()
+        self.dialog.title("ハイパーリンクを除外")
+        self.dialog.geometry("750x360")
+        self.dialog.grab_set()
+        self.dialog.grid()
+        self.dialog.protocol("WM_DELETE_WINDOW",
+                self.cancel)
+        Label(self.dialog, text="") \
+                .grid(row=0, column=0)
+        row = self.set_format(1)
+        Label(self.dialog, text="") \
+                .grid(row=row, column=0)
+        self.set_button(row+1)
+
+
+    def set_format(self, row):
+        Label(self.dialog, text="参照元") \
+                .grid(row=row, column=0)
+        Label(self.dialog, text="") \
+                .grid(row=row+1, column=0)
+        Label(self.dialog, text="税法名") \
+                .grid(row=row, column=1)
+        self.entry_zeihou_mei_moto = Entry(
+                self.dialog, width=50)
+        self.entry_zeihou_mei_moto.configure(
+                font=("MS ゴシック", 12))
+        self.entry_zeihou_mei_moto.grid(row=row, column=2,
+                columnspan=6, sticky=W)
+
+        Label(self.dialog, text="区分") \
+                .grid(row=row+1, column=1, sticky=W)
+        self.combo_kubun_moto = Combobox(self.dialog,
+                values=["法", "法施行令", "法施行規則"],
+                width=10)
+        self.combo_kubun_moto.grid(row=row+1, column=2,
+                columnspan=3)
+        self.combo_kubun_moto.set("法")
+
+        Label(self.dialog, text="第") \
+                .grid(row=row+2, column=2, sticky=N)
+        self.var_jou1_moto = IntVar(self.dialog)
+        self.var_jou1_moto.set(1)
+        self.spin_jou1_moto = Spinbox(self.dialog,
+                textvariable=self.var_jou1_moto,
+                from_=1, to=999, increment=1)
+        self.spin_jou1_moto.grid(row=row+2, column=3,
+                sticky=W)
+        Label(self.dialog, text="条の") \
+                .grid(row=row+2, column=4, sticky=N)
+        self.var_jou2_moto = IntVar(self.dialog)
+        self.var_jou2_moto.set(0)
+        self.spin_jou2_moto = Spinbox(self.dialog,
+                textvariable=self.var_jou2_moto,
+                from_=0, to=999, increment=1)
+        self.spin_jou2_moto.grid(row=row+2, column=5,
+                sticky=W)
+        Label(self.dialog, text="の") \
+                .grid(row=row+2, column=6, sticky=N)
+        self.var_jou3_moto = IntVar(self.dialog)
+        self.var_jou3_moto.set(0)
+        self.spin_jou3_moto = Spinbox(self.dialog,
+                textvariable=self.var_jou3_moto,
+                from_=0, to=999, increment=1)
+        self.spin_jou3_moto.grid(row=row+2, column=7,
+                sticky=W)
+
+        Label(self.dialog, text="第") \
+                .grid(row=row+3, column=2, sticky=N)
+        self.var_kou_moto = IntVar(self.dialog)
+        self.var_kou_moto.set(1)
+        self.spin_kou_moto = Spinbox(self.dialog,
+                textvariable=self.var_kou_moto,
+                from_=1, to=999, increment=1)
+        self.spin_kou_moto.grid(row=row+3, column=3,
+                sticky=W)
+        Label(self.dialog, text="項") \
+                .grid(row=row+3, column=4, sticky=N)
+
+        Label(self.dialog, text="第") \
+                .grid(row=row+4, column=2, sticky=N)
+        self.var_gou1_moto = IntVar(self.dialog)
+        self.var_gou1_moto.set(0)
+        self.spin_gou1_moto = Spinbox(self.dialog,
+                textvariable=self.var_gou1_moto,
+                from_=0, to=999, increment=1)
+        self.spin_gou1_moto.grid(row=row+4, column=3,
+                sticky=W)
+        Label(self.dialog, text="号の") \
+                .grid(row=row+4, column=4, sticky=N)
+        self.var_gou2_moto = IntVar(self.dialog)
+        self.var_gou2_moto.set(0)
+        self.spin_gou2_moto = Spinbox(self.dialog,
+                textvariable=self.var_gou2_moto,
+                from_=0, to=999, increment=1)
+        self.spin_gou2_moto.grid(row=row+4, column=5,
+                sticky=W)
+        Label(self.dialog, text="の") \
+                .grid(row=row+4, column=6, sticky=N)
+        self.var_gou3_moto = IntVar(self.dialog)
+        self.var_gou3_moto.set(0)
+        self.spin_gou3_moto = Spinbox(self.dialog,
+                textvariable=self.var_gou3_moto,
+                from_=0, to=999, increment=1)
+        self.spin_gou3_moto.grid(row=row+4, column=7,
+                sticky=W)
+
+        Label(self.dialog, text="除外文言") \
+                .grid(row=row+5, column=3, sticky=N)
+        self.entry_koumoku = Entry(
+                self.dialog, width=50)
+        self.entry_koumoku.grid(row=row+6, column=2,
+                columnspan=6, sticky=W)
+
+        Label(self.dialog, text="") \
+                .grid(row=row+7, column=2, sticky=N)
+        row += 8
+
+        return row + 8
+
+
+    def set_button(self, row):
+        btCancel = Button(
+                self.dialog,
+                text='Cancel',
+                command=lambda : self.cancel())
+        btCancel.grid(row=row, column=7, pady=6)
+        btOK = Button(
+                self.dialog,
+                text='OK',
+                command=lambda : self.ok())
+        btOK.grid(row=row, column=5, pady=5)
+
+
+    def ok(self):
+        zeihou_mei_moto = self.entry_zeihou_mei_moto. \
+                get()
+#         d.dprint(zeihou_mei_moto)
+        kubun_moto = self.combo_kubun_moto.get()
+        jou1_moto = self.var_jou1_moto.get()
+        jou2_moto = self.var_jou2_moto.get()
+        jou3_moto = self.var_jou3_moto.get()
+        kou_moto = self.var_kou_moto.get()
+        gou1_moto = self.var_gou1_moto.get()
+        gou2_moto = self.var_gou2_moto.get()
+        gou3_moto = self.var_gou3_moto.get()
+        koumoku = self.entry_koumoku.get()
+
+        if jou2_moto == 0:
+            jou_moto = (jou1_moto,)
+        elif jou3_moto == 0:
+            jou_moto = (jou1_moto, jou2_moto)
+        else:
+            jou_moto = (jou1_moto, jou2_moto, jou3_moto)
+        if gou1_moto == 0:
+            gou_moto = None
+        elif gou2_moto == 0:
+            gou_moto = (gou1_moto,)
+        elif gou3_moto == 0:
+            gou_moto = (gou1_moto, gou2_moto)
+        else:
+            gou_moto = (gou1_moto, gou2_moto, gou3_moto)
+        moto_tuple = (jou_moto, kou_moto, gou_moto)
+
+        key = (kubun_moto, zeihou_mei_moto, moto_tuple)
+        item = koumoku
+
+        if key in config.jogai_dict:
+            value = config.jogai_dict[key]
+            value.append(item)
+            config.jogai_dict[key] = value
+        else:
+            config.jogai_dict[key] = [item]
+        import ToKachi
+        ToKachi.save_tokachi_file()
+        self.dialog.destroy()
+
+    def cancel(self):
+        self.dialog.destroy()
+
