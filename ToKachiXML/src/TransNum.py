@@ -137,6 +137,8 @@ class TransNum(object):
     def k2a(cls, kstring: str, zenkaku=False):
         """漢数字をアラビア数字・全角数字に変換"""
     #     print("kstring", kstring)
+        if isinstance(kstring, int):
+            return kstring
         transuji = kstring.translate(TransNum.tt_ksuji)
     #     print("transuji", transuji)
         for suji in sorted(set(TransNum.re_suji.findall(transuji)),

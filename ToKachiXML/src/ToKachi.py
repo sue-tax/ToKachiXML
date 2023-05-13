@@ -454,6 +454,7 @@ def load_text_file(file_name):
 
 
 def save_file(folder, zeihou_mei, kubun, jou_jou):
+    d.dprint(kubun)
     list_log = []
     for kou in jou_jou.kou_list:
         md = Md(zeihou_mei, kubun,
