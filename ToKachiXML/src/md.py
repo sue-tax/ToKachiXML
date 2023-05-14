@@ -105,6 +105,11 @@ class Md(object):
         return file_name
 
 
+    def set_part(self, part):
+        #         self.kubun = (None, None, None, None, None)
+        # 編、章、節、款、目
+        self.part = part
+
     def sakusei_file(self, folder):
         '''
         ファイルの内容(file_name,file_bun)を
@@ -162,6 +167,36 @@ class Md(object):
         list_tag = ['#', self.zeihou_mei, kubun_mei]
         list_bun.extend(list_tag)
         list_bun.append('\n')
+
+        if self.part != None:
+            list_tag_kubun = list_tag.copy()
+            list_tag_kubun.append('/')
+            if self.part[0] != None:
+                list_tag_kubun.append(self.part[0])
+                list_bun.extend(list_tag_kubun)
+                list_bun.append('\n')
+                list_tag_kubun.append('/')
+            if self.part[1] != None:
+                list_tag_kubun.append(self.part[1])
+                list_bun.extend(list_tag_kubun)
+                list_bun.append('\n')
+                list_tag_kubun.append('/')
+            if self.part[2] != None:
+                list_tag_kubun.append(self.part[2])
+                list_bun.extend(list_tag_kubun)
+                list_bun.append('\n')
+                list_tag_kubun.append('/')
+            if self.part[3] != None:
+                list_tag_kubun.append(self.part[3])
+                list_bun.extend(list_tag_kubun)
+                list_bun.append('\n')
+                list_tag_kubun.append('/')
+            if self.part[4] != None:
+                list_tag_kubun.append(self.part[4])
+                list_bun.extend(list_tag_kubun)
+                list_bun.append('\n')
+                list_tag_kubun.append('/')
+
         list_tag.append('/')
         list_tag.append(jou_list[0])
         list_bun.extend(list_tag)
@@ -263,6 +298,9 @@ class Md(object):
         md = Md(m.group(1), kubun,
                 (jou_tuple, kou, gou_tuple),
                 read_text)
+
+        # TODO
+
         md.file_name = full_name
         md.file_bun = read_text
         d.dprint(md)

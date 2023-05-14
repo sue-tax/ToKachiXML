@@ -29,7 +29,6 @@ class Jou_jou(object):
     INDEX_ROMA_SUJI = 5
 
     def __init__(self, bangou_tuple, kou, sakujo=False):
-#         self.kubun = (None, None, None, None, None)
         if len(bangou_tuple) == 1:
             self.bangou_tuple = \
                     (int(TransNum.k2a(bangou_tuple[0])),)
@@ -53,11 +52,14 @@ class Jou_jou(object):
         self.midashi = None
         self.kou_list = [kou]
         self.sakujo = sakujo
+        self.kubun = None
 
-#     def set_kubun(self, kubun):
-#         self.kubun = kubun  # 編、章などの区分
+    def set_kubun(self, kubun):
+        self.kubun = kubun  # 編、章などの区分
             # (None, '２', '３', None, None)
             # 第２章第３節　編・款・目はなし
+#         self.kubun = (None, None, None, None, None)
+# 編、章、節、款、目
 
     def tsuika_kou(self, kou):
         self.kou_list.append(kou)

@@ -19,6 +19,10 @@ import os
 from lxml import etree
 # import xml.etree.ElementTree as ET
 
+
+__version__ = '0.4.0'
+
+
 class Jou_xml(object):
 
     def __init__(self, file):
@@ -27,16 +31,58 @@ class Jou_xml(object):
 
         # 本則の条文のみ
         jou_list = []
+        d.dprint('//MainProvision//Article')
         articles = tree.xpath('//MainProvision//Article')
+
         for article in articles:
 #     def __init__(self, jou_bangou_tuple, kou, sakujo=False):
-            print(article.get('Num'))
             num = article.get('Num')
             if ':' in num:
                 # '29:30' 削除のパターン
                 continue
             jou_bangou_tuple = self.num2tuple(num)
-            print(jou_bangou_tuple)
+
+            part = article.xpath('ancestor::Part')
+            if len(part) != 0:
+#                 d.dprint_data(part[0].text)
+                part_title = part[0].xpath('./PartTitle')
+#                 d.dprint_data(part_title[0].text)
+                part_str = part_title[0].text.replace('　', '')
+            else:
+                part_str = None
+            chapter = article.xpath('ancestor::Chapter')
+            if len(chapter) != 0:
+#                 d.dprint_data(chapter[0].text)
+                chapter_title = chapter[0].xpath('./ChapterTitle')
+#                 d.dprint_data(chapter_title[0].text)
+                chapter_str = chapter_title[0].text.replace('　', '')
+            else:
+                chapter_str = None
+            section = article.xpath('ancestor::Section')
+            if len(section) != 0:
+#                 d.dprint_data(section[0].text)
+                section_title = section[0].xpath('./SectionTitle')
+#                 d.dprint_data(section_title[0].text)
+                section_str = section_title[0].text.replace('　', '')
+            else:
+                section_str = None
+            subsection = article.xpath('ancestor::Subsection')
+            if len(subsection) != 0:
+#                 d.dprint_data(subsection[0].text)
+                subsection_title = subsection[0].xpath('./SubsectionTitle')
+#                 d.dprint_data(subsection_title[0].text)
+                subsection_str = subsection_title[0].text.replace('　', '')
+            else:
+                subsection_str = None
+            division = article.xpath('ancestor::Division')
+            if len(division) != 0:
+#                 d.dprint_data(division)
+                division_title = division[0].xpath('./DivisionTitle')
+#                 d.dprint_data(division_title[0].text)
+                division_str = division_title[0].text.replace('　', '')
+            else:
+                division_str = None
+
             title = article.xpath("ArticleTitle")
             if len(title) != 0:
                 midashi = title[0].text
@@ -52,6 +98,9 @@ class Jou_xml(object):
                 kou = self.create_kou(jou_bangou_tuple,
                         paragraph)
                 jou.tsuika_kou(kou)
+            jou.set_kubun((part_str, chapter_str,
+                    section_str, subsection_str,
+                    division_str))
 
             jou_list.append(jou)
         self.tree = tree
@@ -316,22 +365,51 @@ class Jou_xml(object):
         return tup
 
 if __name__ == '__main__':
-    folder = '.'
-    jou_xml = Jou_xml('消費税法.xml')
+    folder = 'C:\\Users\\sue-t\\Documents\\000_条文\\法人税法\\original'
+#     jou_xml = Jou_xml('法人税法.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '法人税', 0, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '法人税法' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+#     jou_xml = Jou_xml('法人税法施行令.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '法人税', 1, jou_jou)
+
+    jou_xml = Jou_xml('法人税法施行規則.xml')
     jou_list = jou_xml.get_jou_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
-                '消費税', 0, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
-    for (title, text) in appdx_list:
-#         (title, text) = appdx
-        file_name = '消費税法' + title + '.md'
-        file_name = os.path.join(folder, file_name)
-        with open(file_name,
-            mode='w',
-            encoding='UTF-8') as f:
-            f.write(text)
+                '法人税', 2, jou_jou)
+
+#     folder = 'C:\\Users\\sue-t\\Documents\\000_条文\\消費税法令和５年１０月\\sub'
+
+#     jou_xml = Jou_xml('消費税法.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '消費税', 0, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '消費税法' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
 
 #     jou_xml = Jou_xml('消費税法施行令.xml')
 #     jou_list = jou_xml.get_jou_list()
