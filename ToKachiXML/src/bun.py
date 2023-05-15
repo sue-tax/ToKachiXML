@@ -308,7 +308,8 @@ class Bun(object):
         if self.kubun == Bun.kubunHou:
             file_list.append("法＿＿＿＿")
         elif self.kubun == Bun.kubunRei:
-            file_list.append("法施行令＿")
+#             file_list.append("法施行令＿")
+            file_list.append("法施行＿令")
         else:
             assert(self.kubun == Bun.kubunKi)
             file_list.append("法施行規則")

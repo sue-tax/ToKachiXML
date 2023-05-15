@@ -20,7 +20,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 
 class Jou_xml(object):
