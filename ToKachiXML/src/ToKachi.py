@@ -460,6 +460,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
         md = Md(zeihou_mei, kubun,
                 (kou.jou_bangou_tuple, kou.kou_bangou, None),
                 kou.honbun)
+        md.set_part(jou_jou.kubun)
         md.sakusei_file(folder)
         md.save()
         list_log.append('\t\t{}\n'.format(
@@ -473,6 +474,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
                     (gou.jou_bangou_tuple, gou.kou_bangou,
                     gou.gou_bangou_tuple),
                     honbun)
+            md.set_part(jou_jou.kubun)
             md.sakusei_file(folder)
             md.save()
             list_log.append('\t\t{}\n'.format(

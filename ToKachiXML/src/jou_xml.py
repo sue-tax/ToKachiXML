@@ -20,7 +20,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 
 class Jou_xml(object):
@@ -88,7 +88,7 @@ class Jou_xml(object):
                 midashi = title[0].text
             else:
                 midashi = ""
-            print(midashi)
+#             print(midashi)
 
             paragraphs = article.xpath('Paragraph')
             kou = self.create_kou(jou_bangou_tuple,
@@ -190,10 +190,16 @@ class Jou_xml(object):
         d.dprint_name('honbun', honbun)
 
         columns = item.xpath('./ItemSentence/Column')
-        for column in columns:
-            sentences = column.xpath('./Sentence')
-            for sentence in sentences:
-                honbun = honbun + sentence.text
+        if len(columns) != 0:
+            text_column = []
+            for column in columns:
+                sentences = column.xpath('./Sentence')
+                text_sentence = ''
+                for sentence in sentences:
+                    text_sentence = text_sentence + sentence.text
+                text_column.append(text_sentence)
+            text_columns = '　'.join(text_column)
+            honbun = honbun + text_columns
 
         tables = item.xpath('.//Table')
         for table in tables:
@@ -348,7 +354,6 @@ class Jou_xml(object):
 
     def num2tuple(self, num):
         list_num = num.split('_')
-        print(list_num)
         if len(list_num) == 1:
             tup = (int(list_num[0]),)
         elif len(list_num) == 2:
@@ -365,7 +370,8 @@ class Jou_xml(object):
         return tup
 
 if __name__ == '__main__':
-    folder = 'C:\\Users\\sue-t\\Documents\\000_条文\\法人税法\\original'
+#     folder = '.'
+
 #     jou_xml = Jou_xml('法人税法.xml')
 #     jou_list = jou_xml.get_jou_list()
 #     for jou_jou in jou_list:
@@ -387,40 +393,40 @@ if __name__ == '__main__':
 #                 folder, \
 #                 '法人税', 1, jou_jou)
 
-    jou_xml = Jou_xml('法人税法施行規則.xml')
+#     jou_xml = Jou_xml('法人税法施行規則.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '法人税', 2, jou_jou)
+
+    folder = '.'
+
+    jou_xml = Jou_xml('消費税法.xml')
     jou_list = jou_xml.get_jou_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
-                '法人税', 2, jou_jou)
+                '消費税', 0, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = '消費税法' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
 
-#     folder = 'C:\\Users\\sue-t\\Documents\\000_条文\\消費税法令和５年１０月\\sub'
+    jou_xml = Jou_xml('消費税法施行令.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                '消費税', 1, jou_jou)
 
-#     jou_xml = Jou_xml('消費税法.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '消費税', 0, jou_jou)
-#     appdx_list = jou_xml.create_appdxTable()
-#     for (title, text) in appdx_list:
-#         file_name = '消費税法' + title + '.md'
-#         file_name = os.path.join(folder, file_name)
-#         with open(file_name,
-#             mode='w',
-#             encoding='UTF-8') as f:
-#             f.write(text)
-
-#     jou_xml = Jou_xml('消費税法施行令.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '消費税', 1, jou_jou)
-#
-#     jou_xml = Jou_xml('消費税法施行規則.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '消費税', 2, jou_jou)
+    jou_xml = Jou_xml('消費税法施行規則.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                '消費税', 2, jou_jou)
