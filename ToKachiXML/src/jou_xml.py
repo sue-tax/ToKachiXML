@@ -20,7 +20,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 
 class Jou_xml(object):
@@ -112,8 +112,46 @@ class Jou_xml(object):
         appdx_list = []
         for appdxTable in appdxTables:
             appd_titles = appdxTable.xpath("./AppdxTableTitle")
-#             print(titles[0].text)
             text = appd_titles[0].text + '\n'
+            d.dprint(appd_titles[0].text)
+
+            # TODO 順番を考慮する必要あり
+            table_structs = appdxTable.xpath('./TableStruct')
+            if (len(table_structs) == 1):
+                text = text + table_structs[0].text
+                tables = table_structs[0].xpath('./Table')
+                for table in tables:
+                    tableRows = table.xpath('TableRow')
+                    topRow = tableRows[0]
+                    topColumns = topRow.xpath('TableColumn')
+                    if len(topColumns) == 2:
+                        table_text = '\n\n| 上段 | 下段 |\n' \
+                                + '| ---- | ---- |\n'
+                    elif len(topColumns) == 3:
+                        table_text = '\n\n| 上段 | 中段 | 下段 |\n' \
+                                + '| ---- | ---- | ---- |\n'
+                    else:
+                        table_text = '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
+                                + '| ---- | ---- | ---- | ---- |\n'
+                    d.dprint(table_text)
+                    for tableRow in tableRows:
+                        tableColumns = tableRow.xpath('TableColumn')
+                        table_text = table_text + '|'
+                        for tableColumn in tableColumns:
+                            sentences = tableColumn.xpath('./Sentence')
+                            for sentence in sentences:
+                                d.dprint(sentence.text)
+                                if sentence.text != None:
+                                    table_text = table_text + ' ' \
+                                            + sentence.text + ' |'
+                                else:
+                                    # 上段が２つ合わせて、下段が1つ
+                                    table_text = table_text \
+                                            + '    |'
+
+                        table_text = table_text + '\n'
+                    text = text + table_text
+
             items = appdxTable.xpath('.//Item')
             for item in items:
                 titles = item.xpath('./ItemTitle')
@@ -221,8 +259,12 @@ class Jou_xml(object):
                 for tableColumn in tableColumns:
                     sentences = tableColumn.xpath('./Sentence')
                     for sentence in sentences:
-                        table_text = ' ' + table_text \
-                                + sentence.text + ' |'
+                        if sentence.text != None:
+                            table_text = table_text + ' ' \
+                                    + sentence.text + ' |'
+                        else:
+                            table_text = table_text \
+                                    + '    |'
                 table_text = table_text + '\n'
             honbun = honbun + table_text
 
