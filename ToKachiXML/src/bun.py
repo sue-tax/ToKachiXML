@@ -142,6 +142,7 @@ class Bun(object):
         self.joubun_bangou = joubun_bangou
         self.honbun = honbun
         self.kakou_bun = None
+        self.soku = None
 
 
     @classmethod
@@ -149,14 +150,28 @@ class Bun(object):
         bun = Bun(md.zeihou_mei, md.kubun,
                 md.joubun_bangou, md.file_bun)
         bun.kakou_bun = md.file_bun
+        bun.soku = md.soku
         return bun
 
 
     @classmethod
     def create_joubun_file_name(cls, zeihou_mei, kubun,
+            soku,
             joubun_bangou):
         '''
         条文のファイル名の文字列を生成する
+        zeihou_mei:
+            税法名を示す文字列
+            ex. "消費税"
+        kubun:
+            法、令、規則を区分するデータ
+        soku:
+            本則、附則を示すデータ
+            ex. None, '＿' 本則
+                '附則令和五年三月三十一日' 附則
+        joubun_bangou:
+            条文の番号を示すタプル
+            ex. ((1,),(2,),(3,)) 第１条第２項第３号
         '''
         d.dprint_method_start()
         d.dprint(zeihou_mei)
@@ -170,6 +185,11 @@ class Bun(object):
             assert(kubun == Md.kubunKi)
             kubun_mei = '法施行規則'
         list_name = [zeihou_mei, kubun_mei]
+
+        if (soku == None) or (soku == '本則'):
+            list_name.append('＿')
+        else:
+            list_name.append(soku)
 
         jou_list = TransNum.bangou_tuple2str(
                 joubun_bangou)
@@ -188,8 +208,8 @@ class Bun(object):
         加工しない。
         '''
         d.dprint_method_start()
-        d.dprint(jiko1_list)
-        d.dprint(jogai_list)
+#         d.dprint(jiko1_list)
+#         d.dprint(jogai_list)
 
         jogai_index_list = []
         for jogai in jogai_list:
@@ -202,12 +222,15 @@ class Bun(object):
         del jogai_index_list
 
         self.kakou_bun = self.honbun
-        src_list1 = self.kakou_ji_hourei(jogai_sort_list)
-        src_list2 = self.kakou_zenkoutou(jogai_sort_list)
+        src_list1 = self.kakou_ji_hourei(
+                jogai_sort_list)
+        src_list2 = self.kakou_zenkoutou(
+                jogai_sort_list)
         src_list1.extend(src_list2)
         del src_list2
         self.kakou_jiko(jiko1_list, jogai_list)
-        ref_list = self.kakou_ta_hourei(jogai_sort_list)
+        ref_list = self.kakou_ta_hourei(
+                jogai_sort_list)
         del jogai_sort_list
 
 #         d.dprint(self.kakou_bun)
@@ -217,6 +240,15 @@ class Bun(object):
 
 
     def kakou_ji_hourei(self, jogai_sort_list):
+        '''
+        自分自身の法令内の条文を参照している場合に
+        self.kakou_bun に、ハイパーリンクの設定をする
+        jogai_sort_list 内で、位置指定されている
+        ものと一致していれば設定しない。
+        （他の法律を参照している場合を手入力で除外）
+        返り値 src_list は、参照している条文番号の
+        リスト
+        '''
         d.dprint_method_start()
         d.dprint(jogai_sort_list)
 
@@ -228,13 +260,13 @@ class Bun(object):
             m_jou = Bun.matchJiJou.search(
                     self.kakou_bun, index)
             if m_jou != None:
-                d.dprint(m_jou.group(0))
-                d.dprint(m_jou.start(0))
-                d.dprint(m_jou.end(0))
+#                 d.dprint(m_jou.group(0))
+#                 d.dprint(m_jou.start(0))
+#                 d.dprint(m_jou.end(0))
                 # 除外リストの確認
                 jogai_flag = False
                 for jogai in jogai_sort_list:
-                    d.dprint(jogai)
+#                     d.dprint(jogai)
                     if m_jou.end(0) < jogai[0]:
                         break
                     if m_jou.start(0) > jogai[1]:
@@ -246,7 +278,7 @@ class Bun(object):
                             [index:m_jou.end(0)])
                     index = m_jou.end(0)
                     continue
-                d.dprint("without jogai")
+#                 d.dprint("without jogai")
                 m_gou = Bun.matchJiJouKouGou.search(
                     self.kakou_bun, index)
                 if m_gou != None:
@@ -303,6 +335,10 @@ class Bun(object):
 
 
     def translate_ji_jou(self, m):
+        '''
+        ハイパーリンク用にファイル名の文字列を返す。
+        自分自身の法令、本則・附則
+        '''
         d.dprint_method_start()
         file_list = [ self.zeihou_mei ]
         if self.kubun == Bun.kubunHou:
@@ -313,6 +349,12 @@ class Bun(object):
         else:
             assert(self.kubun == Bun.kubunKi)
             file_list.append("法施行規則")
+        if self.soku == None:
+            file_list.append("＿")
+        elif self.soku == "本則":
+            file_list.append("＿")
+        else:
+            file_list.append(self.soku)
         file_list.append('第')
         file_list.append(TransNum.k2a(m.group(2), True))
         file_list.append('条')
@@ -379,13 +421,13 @@ class Bun(object):
         自分で入力することで、フォローする
         '''
         d.dprint_method_start()
-        d.dprint(jogai_sort_list)
+#         d.dprint(jogai_sort_list)
         kakou_list = []
         src_list = []
         index = 0
         length = len(self.kakou_bun)
         while index < length:
-            d.dprint_name("index", index)
+#             d.dprint_name("index", index)
             m = Bun.matchZenkou.search(
                     self.kakou_bun, index)
             if m != None:
@@ -434,13 +476,13 @@ class Bun(object):
                         ref_jou = (jou_bangou[0] - 1,)
                     ref_bangou = (ref_jou, 1, None)
                 elif m.group(0) == '前項':
-                    d.dprint(m.groups())
+#                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
                     ref_bangou = (joubun_bangou[0],
                             joubun_bangou[1] - 1,
                             None)
                 elif m.group(0) == '前号':
-                    d.dprint(m.groups())
+#                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
                     gou_bangou = joubun_bangou[2]
                     # 所得税でエラー 読替規定のせい
@@ -481,6 +523,7 @@ class Bun(object):
                     assert("error")
                 jou_str = Bun.create_joubun_file_name(
                         self.zeihou_mei, self.kubun,
+                        self.soku,
                         ref_bangou)
                 kakou_list.append(jou_str)
                 kakou_list.append(')')
@@ -491,7 +534,7 @@ class Bun(object):
         kakou_list.append(self.kakou_bun[index:])
         self.kakou_bun = ''.join(kakou_list)
         del kakou_list
-        d.dprint(self.kakou_bun)
+#         d.dprint(self.kakou_bun)
         d.dprint_method_end()
         return src_list
 
@@ -502,8 +545,8 @@ class Bun(object):
         自分で入力することで、フォローする
         '''
         d.dprint_method_start()
-        d.dprint(jiko1_list)
-        d.dprint(jogai_list)
+#         d.dprint(jiko1_list)
+#         d.dprint(jogai_list)
         # TODO jogai_sort_list 除外リストの処理　未作成
         for jiko1 in jiko1_list:
             if jiko1 in jogai_list:
@@ -535,7 +578,8 @@ class Bun(object):
         「基礎として計算した金額その他の
         [政令](消費税法施行令第４６条第１項)で定める」に
         加工するために、
-        [ ('消費税法', kubunHou, (30 , 1, None)) ]を返す。
+        [ ('消費税法', kubunHou,
+        '＿', (30 , 1, None)) ]を返す。
         フォルダ内に他の法律が混在する可能性もあるので
         法律名も入れておくことにする。
         ただし、法第３０条第１項に複数の「政令」が
@@ -543,7 +587,7 @@ class Bun(object):
         手作業で修正することを前提とする。
         '''
         d.dprint_method_start()
-        d.dprint(jogai_sort_list)
+#         d.dprint(jogai_sort_list)
         kakou_list = []
         ref_pair_list = []
         index = 0
@@ -555,7 +599,7 @@ class Bun(object):
                 # 除外リストの確認
                 jogai_flag = False
                 for jogai in jogai_sort_list:
-                    d.dprint(jogai)
+#                     d.dprint(jogai)
                     if m_jou.end(0) < jogai[0]:
                         break
                     if m_jou.start(0) > jogai[1]:
@@ -567,13 +611,13 @@ class Bun(object):
                             [index:m_jou.end(0)])
                     index = m_jou.end(0)
                     continue
-                d.dprint("without jogai")
+#                 d.dprint("without jogai")
                 m_gou = Bun.matchTaJouKouGou.search(
                         self.kakou_bun, index)
                 if m_gou != None:
                     if m_jou.start(0) == m_gou.start(0):
-                        d.dprint("matchTaJouKouGou")
-                        d.dprint(m_gou)
+#                         d.dprint("matchTaJouKouGou")
+#                         d.dprint(m_gou)
                         kakou_list.append(
                                 self.kakou_bun
                                 [index:m_gou.start(0)])
@@ -594,8 +638,8 @@ class Bun(object):
                         self.kakou_bun, index)
                 if m_kou != None:
                     if m_jou.start(0) == m_kou.start(0):
-                        d.dprint("matchTaJouKou")
-                        d.dprint(m_kou)
+#                         d.dprint("matchTaJouKou")
+#                         d.dprint(m_kou)
                         kakou_list.append(
                                 self.kakou_bun[
                                 index:m_kou.start(0)])
@@ -631,7 +675,7 @@ class Bun(object):
         kakou_list.append(self.kakou_bun[index:])
         self.kakou_bun = ''.join(kakou_list)
         del kakou_list
-        d.dprint(ref_pair_list)
+#         d.dprint(ref_pair_list)
         d.dprint_method_end()
         return ref_pair_list
 
@@ -639,7 +683,9 @@ class Bun(object):
     def translate_ta_jou(self, m):
         '''
         第Ｘ条でも、第Ｘ条第１項とみなして処理する
-        ('消費税法', kubunHou, (30 , 1, None))を返す。
+        ('消費税法', kubunHou,
+        '＿',
+         (30 , 1, None))を返す。
         '''
         d.dprint_method_start()
         file_list = [ self.zeihou_mei ]
@@ -652,6 +698,8 @@ class Bun(object):
         else:
             e.eprint("translate_ta_jou 法令以外")
             assert(False)
+        # 他の法令については、本則に限定
+        file_list.append("＿")
         file_list.append('第')
         (han, zen) = TransNum.k2a_double(m.group(5))
         file_list.append(zen)
@@ -679,12 +727,14 @@ class Bun(object):
         m_niKiteisuru = Bun.matchTaJouNiKiteisuru.search(
                 self.kakou_bun, m.start())
         if m_niKiteisuru != None:
+            # self.soku が正しく機能するかは未確認
             ref_pair_tuple = (self.zeihou_mei, ref_kubun,
+                    '＿',
                     ref_tuple)
         else:
             ref_pair_tuple = None
-        d.dprint(file_name)
-        d.dprint(ref_pair_tuple)
+#         d.dprint(file_name)
+#         d.dprint(ref_pair_tuple)
         d.dprint_method_end()
         return (file_name, ref_pair_tuple)
 
@@ -705,6 +755,8 @@ class Bun(object):
         else:
             e.eprint("translate_ta_jou_kou 法令以外")
             assert(False)
+        # 他の法令については、本則に限定
+        file_list.append("＿")
         file_list.append('第')
         (han, zen) = TransNum.k2a_double(m.group(5))
         file_list.append(zen)
@@ -737,7 +789,9 @@ class Bun(object):
         m_niKiteisuru = Bun.matchTaJouKouNiKiteisuru. \
                 search(self.kakou_bun, m.start())
         if m_niKiteisuru != None:
-            ref_pair_tuple = (self.zeihou_mei, ref_kubun,
+            ref_pair_tuple = (self.zeihou_mei,
+                    ref_kubun,
+                    '＿',
                     ref_tuple)
         else:
             ref_pair_tuple = None
@@ -759,6 +813,8 @@ class Bun(object):
         else:
             e.eprint("translate_ta_jou_kou_gou 法令以外")
             assert(False)
+        # 他の法令については、本則に限定
+        file_list.append("＿")
         file_list.append('第')
         (han, zen) = TransNum.k2a_double(m.group(5))
         file_list.append(zen)
@@ -808,6 +864,7 @@ class Bun(object):
                 file_list.append(zen3)
                 i_han3 = int(han3)
                 ref_tuple = (ref_tuple[0], i_kou,
+                        '＿',
                         (i_han, i_han2, i_han3))
         file_name = ''.join(file_list)
         del file_list
@@ -815,11 +872,12 @@ class Bun(object):
                 search(self.kakou_bun, m.start())
         if m_niKiteisuru != None:
             ref_pair_tuple = (self.zeihou_mei, ref_kubun,
+                    '＿',
                     ref_tuple)
         else:
             ref_pair_tuple = None
-        d.dprint(file_name)
-        d.dprint(ref_pair_tuple)
+#         d.dprint(file_name)
+#         d.dprint(ref_pair_tuple)
         d.dprint_method_end()
         return (file_name, ref_pair_tuple)
 

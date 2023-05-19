@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.3.0'
+__version__ = '0.4.5'
 
 
 font_name = "MS ゴシック"
@@ -65,7 +65,7 @@ font_size = 16
 window_yoko = 800
 window_tate = 750   # 850
 frame_yoko = 70
-frame_tate = 35 # 38
+frame_tate = 30 # 38
 
 SETTEI_FILE_NAME = 'ToKachi.cfg'
 TOKACHI_FILE_NAME = '.ToKachi.csv'
@@ -1205,9 +1205,11 @@ def load_settei_file():
     input_list = []
     file_name = SETTEI_FILE_NAME
     try:
-        with open(file_name, "r", encoding="ms932", newline='') \
+        with open(file_name, "r",
+                encoding="ms932", newline='') \
                 as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',')
+            spamreader = csv.reader(csvfile,
+                    delimiter=',')
             for row in spamreader:
                 input_list.append(row)
     except OSError as e:
