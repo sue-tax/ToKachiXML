@@ -5,7 +5,7 @@ joucutter joubun_jouより移植
 '''
 
 import c
-# import d
+import d
 
 from TransNum import TransNum
 
@@ -53,6 +53,7 @@ class Jou_jou(object):
         self.kou_list = [kou]
         self.sakujo = sakujo
         self.kubun = None
+        self.soku = None
 
     def set_kubun(self, kubun):
         self.kubun = kubun  # 編、章などの区分
@@ -61,6 +62,17 @@ class Jou_jou(object):
 #         self.kubun = (None, None, None, None, None)
 # 編、章、節、款、目
 
+    def set_soku(self, soku):
+        '''
+        soku:
+            本則、附則の別を示す文字列
+            ex. "" 本則を示す、"附則平成２８年３月３１日"
+        '''
+        self.soku = soku
+
+    def get_soku(self):
+        return self.soku
+        
     def tsuika_kou(self, kou):
         self.kou_list.append(kou)
 
@@ -234,3 +246,9 @@ class Jou_jou(object):
             str_data += kou.__str__()
         return str_data
 
+if __name__ == '__main__':
+    a = '附則'
+    b = '別表'
+    d.dprint(a)
+    d.dprint(b)
+    d.dprint(a>b)

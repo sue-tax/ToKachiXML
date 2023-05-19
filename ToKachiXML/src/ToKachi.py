@@ -63,9 +63,9 @@ __version__ = '0.3.0'
 font_name = "MS ゴシック"
 font_size = 16
 window_yoko = 800
-window_tate = 850
+window_tate = 750   # 850
 frame_yoko = 70
-frame_tate = 38
+frame_tate = 35 # 38
 
 SETTEI_FILE_NAME = 'ToKachi.cfg'
 TOKACHI_FILE_NAME = '.ToKachi.csv'
@@ -461,6 +461,9 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
                 (kou.jou_bangou_tuple, kou.kou_bangou, None),
                 kou.honbun)
         md.set_part(jou_jou.kubun)
+        soku = jou_jou.get_soku()
+        d.dprint(soku)
+        md.set_soku(soku)
         md.sakusei_file(folder)
         md.save()
         list_log.append('\t\t{}\n'.format(
@@ -475,6 +478,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
                     gou.gou_bangou_tuple),
                     honbun)
             md.set_part(jou_jou.kubun)
+            md.set_soku(soku)
             md.sakusei_file(folder)
             md.save()
             list_log.append('\t\t{}\n'.format(
@@ -513,18 +517,14 @@ def kakou1():
         if md == None:
             continue
         bun = Bun.md_to_bun(md)
-#         d.dprint_name("bun.honbun", bun.honbun)
-
-#         key = (kubun_moto, zeihou_mei_moto, moto_tuple)
-#         item = (kubun_saki, zeihou_mei_saki,
-#                 koumoku, (saki_link, saki_tuple))
-
         dict_key = (bun.kubun_mei, bun.zeihou_mei,
+                md.soku,
                 bun.joubun_bangou)
-        d.dprint(bun.joubun_bangou)
-        d.dprint(dict_key)
-        d.dprint(config.jiko1_dict)
+        # d.dprint(bun.joubun_bangou)
+        # d.dprint(dict_key)
+        # d.dprint(config.jiko1_dict)
         if dict_key in config.jiko1_dict:
+            # 既に、jiko1_dictにデータあり
             dict_value = config.jiko1_dict[dict_key]
         else:
             dict_value = []
@@ -532,7 +532,8 @@ def kakou1():
             jogai_list = config.jogai_dict[dict_key]
         else:
             jogai_list = []
-        (ref_pair_list, src_list) = bun.kakou1(dict_value,
+        (ref_pair_list, src_list) = bun.kakou1(
+                dict_value,
                 jogai_list)
 #         d.dprint_name("bun.kakou_bun", bun.kakou_bun)
         src_list_full.extend(src_list)
@@ -543,23 +544,27 @@ def kakou1():
 
         joubun_mei = Bun.create_joubun_file_name(
                 bun.zeihou_mei, bun.kubun,
+                bun.soku,
                 bun.joubun_bangou)
         if bun.kubun == Bun.kubunRei:
             for ref_pair in ref_pair_list:
+                # ref_pair = (
+                #    "消費税", bun.kubunHou,
+                #    "＿", 条文番号タプル)
 #                 d.dprint(ref_pair)
                 if ref_pair[1] == bun.kubunHou:
-                    if (ref_pair[0], ref_pair[2]) \
+                    if (ref_pair[0], ref_pair[2], ref_pair[3]) \
                             in hou_rei_dict:
                         value = hou_rei_dict[
-                                ref_pair[0], ref_pair[2]]
+                                ref_pair[0], ref_pair[2], ref_pair[3]]
                         value.append((joubun_mei,
                                 bun.joubun_bangou))
                         hou_rei_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = value
                     else:
                         hou_rei_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = [(joubun_mei,
                                 bun.joubun_bangou)]
                 else:
@@ -570,33 +575,33 @@ def kakou1():
         elif bun.kubun == Bun.kubunKi:
             for ref_pair in ref_pair_list:
                 if ref_pair[1] == bun.kubunHou:
-                    if (ref_pair[0], ref_pair[2]) \
+                    if (ref_pair[0], ref_pair[2], ref_pair[3]) \
                             in hou_ki_dict:
                         value = hou_ki_dict[
-                                ref_pair[0], ref_pair[2]]
+                                ref_pair[0], ref_pair[2], ref_pair[3]]
                         value.append((joubun_mei,
                                 bun.joubun_bangou))
                         hou_ki_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = value
                     else:
                         hou_ki_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = [(joubun_mei,
                                 bun.joubun_bangou)]
                 elif ref_pair[1] == bun.kubunRei:
-                    if (ref_pair[0], ref_pair[2]) \
+                    if (ref_pair[0], ref_pair[2], ref_pair[3]) \
                             in rei_ki_dict:
                         value = rei_ki_dict[
-                                ref_pair[0], ref_pair[2]]
+                                ref_pair[0], ref_pair[2], ref_pair[3]]
                         value.append((joubun_mei,
                                 bun.joubun_bangou))
                         rei_ki_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = value
                     else:
                         rei_ki_dict[
-                                ref_pair[0], ref_pair[2]] \
+                                ref_pair[0], ref_pair[2], ref_pair[3]] \
                                 = [(joubun_mei,
                                 bun.joubun_bangou)]
                 else:
@@ -667,13 +672,18 @@ def kakou2():
     # TODO hou_rei_dict が空で、自己設定のみの場合が
     # 処理できない
 
+        # dict_key = (bun.kubun_mei, bun.zeihou_mei,
+        #         md.soku,
+        #         bun.joubun_bangou)
+
     for key_tuple, value_list in hou_rei_dict.items():
         d.dprint(key_tuple)
         d.dprint(value_list)
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunHou,
-                joubun_bangou=key_tuple[1])
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
             list_log.append("\t【{}】などに対応する" \
@@ -729,7 +739,8 @@ def kakou2():
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunHou,
-                joubun_bangou=key_tuple[1])
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
             list_log.append("\t【{}】などに対応する" \
@@ -784,7 +795,8 @@ def kakou2():
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunRei,
-                joubun_bangou=key_tuple[1])
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
             list_log.append("\t【{}】などに対応する" \

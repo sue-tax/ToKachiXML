@@ -41,6 +41,9 @@ class Jou_kou(object):
         self.honbun = honbun
         self.gou_list = gou_list
 
+    def set_soku(self, soku):
+        self.soku = soku
+
     def tsuika_gou(self, gou):
         self.gou_list.append(gou)
 

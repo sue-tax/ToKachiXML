@@ -51,6 +51,9 @@ class Jou_gou(object):
         self.koumoku_list = koumoku_list
 #         d.dprint_method_end()
 
+    def set_soku(self, soku):
+        self.soku = soku
+
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)
 
