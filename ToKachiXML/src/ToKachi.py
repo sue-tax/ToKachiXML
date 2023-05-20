@@ -462,8 +462,10 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
                 kou.honbun)
         md.set_part(jou_jou.kubun)
         soku = jou_jou.get_soku()
-        d.dprint(soku)
         md.set_soku(soku)
+        midashi = jou_jou.get_midashi()
+        d.dprint(midashi)
+        md.set_midashi(midashi)
         md.sakusei_file(folder)
         md.save()
         list_log.append('\t\t{}\n'.format(
@@ -479,6 +481,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
                     honbun)
             md.set_part(jou_jou.kubun)
             md.set_soku(soku)
+            md.set_midashi(midashi)
             md.sakusei_file(folder)
             md.save()
             list_log.append('\t\t{}\n'.format(

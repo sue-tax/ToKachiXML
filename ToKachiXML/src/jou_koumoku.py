@@ -27,6 +27,14 @@ class Jou_koumoku(object):
         ("語句", "定義")もある
         '''
         self.koumoku_list = koumoku_list
+        self.soku = None
+        self.midashi = None
+
+    def set_soku(self, soku):
+        self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)

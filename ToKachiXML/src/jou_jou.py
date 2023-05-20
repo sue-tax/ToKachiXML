@@ -54,30 +54,30 @@ class Jou_jou(object):
         self.sakujo = sakujo
         self.kubun = None
         self.soku = None
+        self.midashi = None
 
     def set_kubun(self, kubun):
         self.kubun = kubun  # 編、章などの区分
-            # (None, '２', '３', None, None)
-            # 第２章第３節　編・款・目はなし
-#         self.kubun = (None, None, None, None, None)
-# 編、章、節、款、目
 
     def set_soku(self, soku):
         '''
         soku:
             本則、附則の別を示す文字列
-            ex. "" 本則を示す、"附則平成２８年３月３１日"
+            ex. "本則" ,"附則平成２８年３月３１日"
         '''
         self.soku = soku
 
     def get_soku(self):
         return self.soku
-        
+
     def tsuika_kou(self, kou):
         self.kou_list.append(kou)
 
     def set_midashi(self, midashi):
         self.midashi = midashi
+
+    def get_midashi(self):
+        return self.midashi
 
     def get_bangou_tuple(self):
         return self.bangou_tuple

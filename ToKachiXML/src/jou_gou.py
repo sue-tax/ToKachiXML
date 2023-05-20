@@ -50,9 +50,14 @@ class Jou_gou(object):
         self.honbun = honbun
         self.koumoku_list = koumoku_list
 #         d.dprint_method_end()
+        self.soku = None
+        self.midashi = None
 
     def set_soku(self, soku):
         self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)

@@ -40,9 +40,14 @@ class Jou_kou(object):
         self.kou_bangou = kou_bangou
         self.honbun = honbun
         self.gou_list = gou_list
+        self.soku = None
+        self.midashi = None
 
     def set_soku(self, soku):
         self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
 
     def tsuika_gou(self, gou):
         self.gou_list.append(gou)

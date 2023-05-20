@@ -83,7 +83,8 @@ class Md(object):
         self.honbun = honbun
         self.file_name = file_name
         self.file_bun = file_bun
-
+        self.soku = None
+        self.midashi = None
 
     def set_file_bun(self, kakou_bun):
         self.file_bun = kakou_bun
@@ -91,6 +92,10 @@ class Md(object):
 
     def set_soku(self, soku):
         self.soku = soku
+        return
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
         return
 
     @classmethod
@@ -169,9 +174,15 @@ class Md(object):
         # 前提として項、号以下であり、条のことはない
         assert(jou_list[0] != '')
         assert(jou_list[1] != '')
+        d.dprint(self.midashi)
+        if self.midashi != None:
+            list_bun = [self.midashi, '\n']
+        else:
+            list_bun = []
         if jou_list[2] == '':
             # 項
-            list_bun = [self.zeihou_mei, kubun_mei]
+            list_bun.append(self.zeihou_mei)
+            list_bun.append(kubun_mei)
             if self.soku == None:
                 pass
                 # list_bun.append("＿")
@@ -185,16 +196,15 @@ class Md(object):
             # とは、しない。
         else:
             # 号
-            list_bun = ['[' ,self.zeihou_mei, kubun_mei]
+            list_bun.append('[')
+            list_bun.append(self.zeihou_mei)
+            list_bun.append(kubun_mei)
             if self.soku == None:
                 pass
-                # list_bun.append("＿")
             elif self.soku == "本則":
-                # list_bun.append("＿")
                 pass
             else:
                 list_bun.append(self.soku)
-
             list_bun.append(jou_list[0])
             list_bun.append(jou_list[1])
             list_bun.append('](')
@@ -211,12 +221,11 @@ class Md(object):
             list_bun.append(')')
             list_bun.append(jou_list[2])
         list_name.append('.md')
-        d.dprint(list_name)
+#         d.dprint(list_name)
         file_name = ''.join(list_name)
         self.file_name = os.path.join(folder, file_name)
         del list_name
 
-#         list_bun.append('\n\n　')
         list_bun.append('\n\n')
         list_bun.append(self.honbun)
         list_bun.append('\n\n')
@@ -259,6 +268,14 @@ class Md(object):
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')
                 list_tag_kubun.append('/')
+        else:
+            list_tag_kubun = list_tag.copy()
+            list_tag_kubun.append('/')
+        # #所得税法/第一編総則/第一章通則/第１条
+        # タグペインに便利
+        list_tag_kubun.append(jou_list[0])
+        list_bun.extend(list_tag_kubun)
+        list_bun.append('\n')
 
         list_tag.append('/')
         list_tag.append(jou_list[0])
