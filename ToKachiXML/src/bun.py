@@ -315,12 +315,15 @@ class Bun(object):
                         index = m_kou.end(0)
                         continue
                 kakou_list.append(
-                        self.kakou_bun[index:m_jou.start(0)])
+                        self.kakou_bun \
+                        [index:m_jou.start(0)])
                 kakou_list.append('[')
                 kakou_list.append(m_jou.group(0))
                 kakou_list.append('](')
                 link = self.translate_ji_jou(m_jou)
                 kakou_list.append(link)
+                # ToKachiでは、常に第１項とする
+                kakou_list.append('第１項')
                 kakou_list.append(')')
                 src_list.append(link)
                 index = m_jou.end(0)

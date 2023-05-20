@@ -57,6 +57,7 @@ class Jou_jou(object):
         self.midashi = None
 
     def set_kubun(self, kubun):
+        d.dprint(kubun)
         self.kubun = kubun  # 編、章などの区分
 
     def set_soku(self, soku):

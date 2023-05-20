@@ -159,7 +159,7 @@ class Md(object):
             kubun_mei = '法施行規則'
             kubun_file_mei = '法施行規則'
         list_name = [self.zeihou_mei, kubun_file_mei]
-        d.dprint(self.soku)
+#         d.dprint(self.soku)
         if self.soku == None:
             list_name.append("＿")
         elif self.soku == "本則":
@@ -174,7 +174,7 @@ class Md(object):
         # 前提として項、号以下であり、条のことはない
         assert(jou_list[0] != '')
         assert(jou_list[1] != '')
-        d.dprint(self.midashi)
+#         d.dprint(self.midashi)
         if self.midashi != None:
             list_bun = [self.midashi, '\n']
         else:
@@ -241,29 +241,40 @@ class Md(object):
             list_bun.append('\n')
 
         if self.part != None:
+            d.dprint(self.part)
             list_tag_kubun = list_tag.copy()
             list_tag_kubun.append('/')
             if self.part[0] != None:
+                # 表示の順番を考慮して
+                list_tag_kubun.append('_')
                 list_tag_kubun.append(self.part[0])
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')
                 list_tag_kubun.append('/')
             if self.part[1] != None:
+                # 表示の順番を考慮して
+                list_tag_kubun.append('_')
                 list_tag_kubun.append(self.part[1])
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')
                 list_tag_kubun.append('/')
             if self.part[2] != None:
+                # 表示の順番を考慮して
+                list_tag_kubun.append('_')
                 list_tag_kubun.append(self.part[2])
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')
                 list_tag_kubun.append('/')
             if self.part[3] != None:
+                # 表示の順番を考慮して
+                list_tag_kubun.append('_')
                 list_tag_kubun.append(self.part[3])
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')
                 list_tag_kubun.append('/')
             if self.part[4] != None:
+                # 表示の順番を考慮して
+                list_tag_kubun.append('_')
                 list_tag_kubun.append(self.part[4])
                 list_bun.extend(list_tag_kubun)
                 list_bun.append('\n')

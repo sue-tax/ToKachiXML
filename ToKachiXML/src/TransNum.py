@@ -199,6 +199,9 @@ if __name__ == '__main__':
     moto = "七十七"
     go = TransNum.k2a(moto, True)
     print(go)
+    moto = "国税通則法＿＿＿＿附則平成三一年三月二九日第１条第１項"
+    go = TransNum.k2a(moto, True)
+    print(go)
     jou = ((11,22,43),54,(125,1026,7,8))
     str_jou = TransNum.bangou_tuple2str(jou)
     print(str_jou)

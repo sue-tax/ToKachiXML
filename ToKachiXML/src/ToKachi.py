@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 
 font_name = "MS ゴシック"
@@ -464,7 +464,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
         soku = jou_jou.get_soku()
         md.set_soku(soku)
         midashi = jou_jou.get_midashi()
-        d.dprint(midashi)
+#         d.dprint(midashi)
         md.set_midashi(midashi)
         md.sakusei_file(folder)
         md.save()
