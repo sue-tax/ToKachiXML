@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.4.6'
+__version__ = '0.4.7'
 
 
 font_name = "MS ゴシック"

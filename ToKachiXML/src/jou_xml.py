@@ -22,7 +22,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.4.6'
+__version__ = '0.4.7'
 
 
 class Jou_xml(object):
@@ -47,9 +47,40 @@ class Jou_xml(object):
                         fusoku_name[:index+1], True)
                 str_fusoku = "附則" + str_ara
             articles = fusoku.xpath(".//Article")
-            self.proc_article(str_fusoku, jou_list, articles)
+            if len(articles) != 0:
+                self.proc_article(str_fusoku,
+                        jou_list, articles)
+            else:
+                # 附則の中には、第Ｘ条がなく、
+                # 項のみの場合あり
+                self.proc_jou_nashi(str_fusoku,
+                        jou_list, fusoku)
         self.tree = tree
         self.jou_list = jou_list
+
+    def proc_jou_nashi(self, soku, jou_list, fusoku):
+        '''
+        条（article）がないfusokuで示される附則を
+        仮の条として、各項を処理して
+        jou_listに条文データを設定する。
+        sokuは、附則名を示す。
+        '''
+        paragraphs = fusoku.xpath('Paragraph')
+        kou = self.create_kou(soku, midashi=None,
+                jou_bangou_tuple=(0,),
+                paragraph=paragraphs[0])
+        jou = Jou_jou(bangou_tuple=(0,), kou=kou)
+        for paragraph in paragraphs[1:]:
+            kou = self.create_kou(soku,
+                    midashi=None,
+                    jou_bangou_tuple=(0,),
+                    paragraph=paragraph)
+            jou.tsuika_kou(kou)
+        jou.set_kubun((None, None,
+                None, None, None))
+        jou.set_soku(soku)
+#         jou.set_midashi(midashi)
+        jou_list.append(jou)
 
 
     def proc_article(self, soku, jou_list, articles):
@@ -552,6 +583,53 @@ class Jou_xml(object):
 if __name__ == '__main__':
     folder = '.\\org'
 
+#     folder = '.\\data'
+
+
+#     jou_xml = Jou_xml('国税徴収法.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '国税徴収', 0, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '国税徴収法＿＿＿＿' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+#     jou_xml = Jou_xml('国税徴収法施行令.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '国税徴収', 1, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '国税徴収法施行＿令' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+#     jou_xml = Jou_xml('国税徴収法施行規則.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '国税徴収', 2, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '国税徴収法施行規則' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+
+
 #     jou_xml = Jou_xml('法人税法.xml')
 #     jou_list = jou_xml.get_jou_list()
 #     for jou_jou in jou_list:
@@ -682,6 +760,49 @@ if __name__ == '__main__':
 #             encoding='UTF-8') as f:
 #             f.write(text)
 
+    jou_xml = Jou_xml('地方税法.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                '地方税', 0, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = '地方税法＿＿＿＿' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
+    jou_xml = Jou_xml('地方税法施行令.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                '地方税', 1, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = '地方税法施行＿令' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
+    jou_xml = Jou_xml('地方税法施行規則.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                '地方税', 2, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = '地方税法施行規則' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
+
 #     jou_xml = Jou_xml('相続税法.xml')
 #     jou_list = jou_xml.get_jou_list()
 #     for jou_jou in jou_list:
@@ -696,7 +817,6 @@ if __name__ == '__main__':
 #             mode='w',
 #             encoding='UTF-8') as f:
 #             f.write(text)
-#
 #     jou_xml = Jou_xml('相続税法施行令.xml')
 #     jou_list = jou_xml.get_jou_list()
 #     for jou_jou in jou_list:
@@ -726,48 +846,48 @@ if __name__ == '__main__':
 #             encoding='UTF-8') as f:
 #             f.write(text)
 
-    jou_xml = Jou_xml('所得税法.xml')
-    jou_list = jou_xml.get_jou_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                '所得税', 0, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
-    for (title, text) in appdx_list:
-        file_name = '所得税法＿＿＿＿' + title + '.md'
-        file_name = os.path.join(folder, file_name)
-        with open(file_name,
-            mode='w',
-            encoding='UTF-8') as f:
-            f.write(text)
-    jou_xml = Jou_xml('所得税法施行令.xml')
-    jou_list = jou_xml.get_jou_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                '所得税', 1, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
-    for (title, text) in appdx_list:
-        file_name = '所得税法施行＿令' + title + '.md'
-        file_name = os.path.join(folder, file_name)
-        with open(file_name,
-            mode='w',
-            encoding='UTF-8') as f:
-            f.write(text)
-    jou_xml = Jou_xml('所得税法施行規則.xml')
-    jou_list = jou_xml.get_jou_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                '所得税', 2, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
-    for (title, text) in appdx_list:
-        file_name = '所得税法施行規則' + title + '.md'
-        file_name = os.path.join(folder, file_name)
-        with open(file_name,
-            mode='w',
-            encoding='UTF-8') as f:
-            f.write(text)
+#     jou_xml = Jou_xml('所得税法.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '所得税', 0, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '所得税法＿＿＿＿' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+#     jou_xml = Jou_xml('所得税法施行令.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '所得税', 1, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '所得税法施行＿令' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
+#     jou_xml = Jou_xml('所得税法施行規則.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '所得税', 2, jou_jou)
+#     appdx_list = jou_xml.create_appdxTable()
+#     for (title, text) in appdx_list:
+#         file_name = '所得税法施行規則' + title + '.md'
+#         file_name = os.path.join(folder, file_name)
+#         with open(file_name,
+#             mode='w',
+#             encoding='UTF-8') as f:
+#             f.write(text)
 
 #     jou_xml = Jou_xml('消費税法.xml')
 #     jou_list = jou_xml.get_jou_list()
