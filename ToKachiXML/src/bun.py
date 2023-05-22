@@ -174,9 +174,9 @@ class Bun(object):
             ex. ((1,),(2,),(3,)) 第１条第２項第３号
         '''
         d.dprint_method_start()
-        d.dprint(zeihou_mei)
-        d.dprint(kubun)
-        d.dprint(joubun_bangou)
+#         d.dprint(zeihou_mei)
+#         d.dprint(kubun)
+#         d.dprint(joubun_bangou)
         if kubun == Bun.kubunHou:
             kubun_mei = '法＿＿＿＿'
         elif kubun == Bun.kubunRei:
@@ -194,9 +194,10 @@ class Bun(object):
         jou_list = TransNum.bangou_tuple2str(
                 joubun_bangou)
         list_name.extend(jou_list)
+        del jou_list
         joubun_name = ''.join(list_name)
         del list_name
-        d.dprint(joubun_name)
+#         d.dprint(joubun_name)
         d.dprint_method_end()
         return joubun_name
 
@@ -250,7 +251,7 @@ class Bun(object):
         リスト
         '''
         d.dprint_method_start()
-        d.dprint(jogai_sort_list)
+#         d.dprint(jogai_sort_list)
 
         kakou_list = []
         src_list = []
@@ -332,7 +333,7 @@ class Bun(object):
         kakou_list.append(self.kakou_bun[index:])
         self.kakou_bun = ''.join(kakou_list)
         del kakou_list
-        d.dprint(self.kakou_bun)
+#         d.dprint(self.kakou_bun)
         d.dprint_method_end()
         return src_list
 
@@ -371,7 +372,7 @@ class Bun(object):
                         TransNum.k2a(m.group(6), True))
         file_name = ''.join(file_list)
         del file_list
-        d.dprint(file_name)
+#         d.dprint(file_name)
         d.dprint_method_end()
         return file_name
 
@@ -384,7 +385,7 @@ class Bun(object):
         file_list.append('項')
         file_name = ''.join(file_list)
         del file_list
-        d.dprint(file_name)
+#         d.dprint(file_name)
         d.dprint_method_end()
         return file_name
 
@@ -412,7 +413,7 @@ class Bun(object):
                         TransNum.k2a(m.group(13), True))
         file_name = ''.join(file_list)
         del file_list
-        d.dprint(file_name)
+#         d.dprint(file_name)
         d.dprint_method_end()
         return file_name
 
@@ -454,6 +455,7 @@ class Bun(object):
                 kakou_list.append('[')
                 kakou_list.append(m.group(0))
                 kakou_list.append('](')
+#                 d.dprint(self.joubun_bangou)
                 if m.group(0) == '前条':
                     joubun_bangou = self.joubun_bangou
                     ref_bangou = (joubun_bangou[0],
@@ -476,14 +478,22 @@ class Bun(object):
                         else:
                             ref_jou = (jou_bangou[0],)
                     else:
+                        if jou_bangou[0] == 0:
+                            # 附則で条番号がない場合に、
+                            # 第０条としているため
+                            continue
                         ref_jou = (jou_bangou[0] - 1,)
                     ref_bangou = (ref_jou, 1, None)
+#                     d.dprint("前条")
+#                     d.dprint(ref_bangou)
                 elif m.group(0) == '前項':
 #                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
                     ref_bangou = (joubun_bangou[0],
                             joubun_bangou[1] - 1,
                             None)
+#                     d.dprint("前項")
+#                     d.dprint(ref_bangou)
                 elif m.group(0) == '前号':
 #                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
@@ -510,18 +520,24 @@ class Bun(object):
                     ref_bangou = (joubun_bangou[0],
                             joubun_bangou[1],
                             ref_gou)
+#                     d.dprint("前号")
+#                     d.dprint(ref_bangou)
                 elif m.group(0)[-1] == '項':
                     # 第Ｘ項
-                    d.dprint(m.groups())
+#                     d.dprint(m.groups())
                     han = TransNum.k2a(m.group(6))
                     ref_bangou = (self.joubun_bangou[0],
                             han, None)
+#                     d.dprint("項")
+#                     d.dprint(ref_bangou)
                 elif m.group(0)[-1] == '号':
-                    d.dprint(m.groups())
+#                     d.dprint(m.groups())
                     han = TransNum.k2a(m.group(8))
                     ref_bangou = (self.joubun_bangou[0],
                             self.joubun_bangou[1],
                             (han,))
+#                     d.dprint("号")
+#                     d.dprint(ref_bangou)
                 else:
                     assert("error")
                 jou_str = Bun.create_joubun_file_name(
@@ -563,7 +579,7 @@ class Bun(object):
                         self.kakou_bun[index+len(jiko1[2]):]
                         )
                 self.kakou_bun = shin_bun
-        d.dprint(self.kakou_bun)
+#         d.dprint(self.kakou_bun)
         d.dprint_method_end()
         return
 
@@ -747,7 +763,7 @@ class Bun(object):
         ('消費税法', kubunHou, (30 , 1, None))を返す。
         '''
         d.dprint_method_start()
-        d.dprint(m.groups())
+#         d.dprint(m.groups())
         file_list = [ self.zeihou_mei ]
         if m.group(1) == "法":
             file_list.append("法＿＿＿＿")
@@ -798,8 +814,8 @@ class Bun(object):
                     ref_tuple)
         else:
             ref_pair_tuple = None
-        d.dprint(file_name)
-        d.dprint(ref_pair_tuple)
+#         d.dprint(file_name)
+#         d.dprint(ref_pair_tuple)
         d.dprint_method_end()
         return (file_name, ref_pair_tuple)
 
@@ -895,7 +911,7 @@ class Bun(object):
             [政令](消費税法施行令第１条第３項第４号)に定める
         '''
         d.dprint_method_start()
-        d.dprint(rei_list)
+#         d.dprint(rei_list)
         list_msg = self.kakou_sadameru_rei(zeihou_mei,
                 rei_list)
         d.dprint_method_end()
@@ -908,7 +924,7 @@ class Bun(object):
         加工文を作る。
         '''
         d.dprint_method_start()
-        d.dprint(ki_list)
+#         d.dprint(ki_list)
         list_msg = self.kakou_sadameru_ki(zeihou_mei,
                 ki_list)
         d.dprint_method_end()
@@ -917,8 +933,8 @@ class Bun(object):
 
     def kakou_sadameru_rei(self, zeihou_mei, rei_list):
         d.dprint_method_start()
-        d.dprint(zeihou_mei)
-        d.dprint(rei_list)
+#         d.dprint(zeihou_mei)
+#         d.dprint(rei_list)
         iter_m = Bun.matchReiSadameru.finditer(
                 self.kakou_bun)
         list_m = list(iter_m)
@@ -956,7 +972,7 @@ class Bun(object):
 
     def kakou_sadameru_ki(self, zeihou_mei, ki_list):
         d.dprint_method_start()
-        d.dprint(ki_list)
+#         d.dprint(ki_list)
         iter_m = Bun.matchKiSadameru.finditer(
                 self.kakou_bun)
         list_m = list(iter_m)
@@ -985,7 +1001,7 @@ class Bun(object):
             kakou_list.append('で定める')
             index = m.end(0)
         kakou_list.append(self.kakou_bun[index:])
-        d.dprint(kakou_list)
+#         d.dprint(kakou_list)
         self.kakou_bun = ''.join(kakou_list)
         del kakou_list
 #         d.dprint(self.kakou_bun)

@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.4.7'
+__version__ = '0.4.8'
 
 
 font_name = "MS ゴシック"
@@ -457,20 +457,30 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
     d.dprint(kubun)
     list_log = []
     for kou in jou_jou.kou_list:
-        md = Md(zeihou_mei, kubun,
+        md_kou = Md(zeihou_mei, kubun,
                 (kou.jou_bangou_tuple, kou.kou_bangou, None),
                 kou.honbun)
-        md.set_part(jou_jou.kubun)
+        md_kou.set_part(jou_jou.kubun)
         soku = jou_jou.get_soku()
-        md.set_soku(soku)
+        md_kou.set_soku(soku)
         midashi = jou_jou.get_midashi()
 #         d.dprint(midashi)
-        md.set_midashi(midashi)
-        md.sakusei_file(folder)
-        md.save()
+        md_kou.set_midashi(midashi)
+        md_kou.sakusei_file(folder)
+        md_kou.save()
         list_log.append('\t\t{}\n'.format(
-                os.path.basename(md.file_name)))
-        del md
+                os.path.basename(md_kou.file_name)))
+#         if len(kou.gou_list) != 0:
+        (file_name, file_bun) = \
+                md_kou.sakusei_file_full_kou(
+                folder, kou.gou_list)
+#         d.dprint(file_name)
+#         d.dprint(file_bun)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(file_bun)
+        del md_kou
         for gou in kou.gou_list:
             # 号の処理
             # TODO イ、ロ、ハを追加する。
@@ -486,6 +496,14 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
             md.save()
             list_log.append('\t\t{}\n'.format(
                     os.path.basename(md.file_name)))
+#     d.dprint(jou_jou.bangou_tuple)
+    (file_name, file_bun) = \
+            Md.sakusei_file_full_jou(
+            folder, zeihou_mei, kubun, jou_jou)
+    with open(file_name,
+        mode='w',
+        encoding='UTF-8') as f:
+        f.write(file_bun)
     return list_log
 
 
@@ -515,6 +533,10 @@ def kakou1():
                 or (file_name[0] == '_'):
             continue
         if (file_name[-3:] != '.md'):
+            continue
+        if (file_name[-4:] == '_.md'):
+            # "所得税法第９条_.md"などは
+            # 加工対象外とする
             continue
         md = Md.load(config.folder_name, file_name)
         if md == None:
@@ -657,7 +679,7 @@ def kakou2():
     d.dprint_method_start()
 #     global folder_name
     global hou_rei_dict, hou_ki_dict, rei_ki_dict
-    d.dprint(hou_rei_dict)
+#     d.dprint(hou_rei_dict)
     # hou_ki_dict[('消費税法',((2,),1,(8,)))] =
     #    ["消費税法施行規則第２条第１項",
     #    (((2,),1,None))]
@@ -680,8 +702,8 @@ def kakou2():
         #         bun.joubun_bangou)
 
     for key_tuple, value_list in hou_rei_dict.items():
-        d.dprint(key_tuple)
-        d.dprint(value_list)
+#         d.dprint(key_tuple)
+#         d.dprint(value_list)
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunHou,
@@ -710,6 +732,7 @@ def kakou2():
         # del value_list
         sort_list = sorted(zero_list,
                 reverse=False, key=lambda x:x[1])
+        del zero_list
         jiko2_key = ('法', '法施行令',
                 key_tuple[0], key_tuple[1])
         if jiko2_key in config.jiko2_dict:
@@ -719,7 +742,8 @@ def kakou2():
             for value in value_list:
                 data = (value[1][0], value[1][1])
                 sort_list.insert(value[0] - 1, data)
-        log_msg = bun.kakou2_rei(key_tuple[0], sort_list)
+        log_msg = bun.kakou2_rei(key_tuple[0],
+                sort_list)
         if log_msg == None:
             md.set_file_bun(bun.kakou_bun)
             md.save()
@@ -736,9 +760,10 @@ def kakou2():
             for value in sort_list:
                 list_log.append('\t\t\t{}\n'. \
                         format(value[0]))
+        del sort_list
     for key_tuple, value_list in hou_ki_dict.items():
-        d.dprint(key_tuple)
-        d.dprint(value_list)
+#         d.dprint(key_tuple)
+#         d.dprint(value_list)
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunHou,
@@ -766,6 +791,7 @@ def kakou2():
         # del value_list
         sort_list = sorted(zero_list,
                 reverse=False, key=lambda x:x[1])
+        del zero_list
         jiko2_key = ('法', '法施行規則',
                 key_tuple[0], key_tuple[1])
         if jiko2_key in config.jiko2_dict:
@@ -792,9 +818,10 @@ def kakou2():
             for value in sort_list:
                 list_log.append('\t\t\t{}\n'. \
                         format(value[0]))
+        del sort_list
     for key_tuple, value_list in rei_ki_dict.items():
-        d.dprint(key_tuple)
-        d.dprint(value_list)
+#         d.dprint(key_tuple)
+#         d.dprint(value_list)
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
                 kubun=Md.kubunRei,
@@ -822,6 +849,7 @@ def kakou2():
         # del value_list
         sort_list = sorted(zero_list,
                 reverse=False, key=lambda x:x[1])
+        del zero_list
         jiko2_key = ('法施行令', '法施行規則',
                 key_tuple[0], key_tuple[1])
         if jiko2_key in config.jiko2_dict:
@@ -848,6 +876,7 @@ def kakou2():
             for value in sort_list:
                 list_log.append('\t\t\t{}\n'. \
                         format(value[0]))
+        del sort_list
     str_log = ''.join(list_log)
     del list_log
     set_log(str_log)
@@ -943,17 +972,6 @@ def set_jogai():
 
 
 def set_link2_2(dlg):
-#     dt_now = datetime.datetime.now()
-#     file_name = ''.join([config.dlg_mei, config.dlg_kubun,
-#             dt_now.strftime("%Y%m%d%H%M%S"), '.txt'])
-#     full_name = os.path.join(config.folder_name, file_name)
-#     with open(full_name,
-#             mode='w',
-#             encoding='UTF-8') as f:
-#         f.write(config.dlg_joubun)
-#     str_log = 'ファイル【{}】を作成しました。\n'. \
-#             format(file_name)
-#     set_log(str_log)
     return
 
 
@@ -964,10 +982,7 @@ def full_process():
     return
 
 def set_log(str_log):
-#     global form_log
     config.form_log.configure(state=NORMAL)
-#     str_src = form_src.get('1.0', 'end -1c')
-#     form_log.delete("0.0", "end")
     config.form_log.insert("end", str_log)
     config.form_log.see("end")
     config.form_log.configure(state=DISABLED)

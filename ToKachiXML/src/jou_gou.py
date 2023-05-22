@@ -52,12 +52,16 @@ class Jou_gou(object):
 #         d.dprint_method_end()
         self.soku = None
         self.midashi = None
+        self.item_title = None
 
     def set_soku(self, soku):
         self.soku = soku
 
     def set_midashi(self, midashi):
         self.midashi = midashi
+
+    def set_item_title(self, item_title):
+        self.item_title = item_title
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)
@@ -77,6 +81,9 @@ class Jou_gou(object):
         self.kou_bangou = kou_bangou
         for koumoku in self.koumoku_list:
             koumoku.set_kou_bangou(kou_bangou)
+
+    def get_item_title(self):
+        return self.item_title
 
     def get_honbun(self):
         '''

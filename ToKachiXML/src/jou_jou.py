@@ -30,23 +30,45 @@ class Jou_jou(object):
 
     def __init__(self, bangou_tuple, kou, sakujo=False):
         if len(bangou_tuple) == 1:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),)
+                    ,None,None)
         elif len(bangou_tuple) == 2:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])))
+                    ,None,None)
         elif len(bangou_tuple) == 3:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])),
                     int(TransNum.k2a(bangou_tuple[2])))
+                    ,None,None)
         elif len(bangou_tuple) == 4:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])),
                     int(TransNum.k2a(bangou_tuple[2])),
                     int(TransNum.k2a(bangou_tuple[3])))
+                    ,None,None)
+#         if len(bangou_tuple) == 1:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),)
+#         elif len(bangou_tuple) == 2:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])))
+#         elif len(bangou_tuple) == 3:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])),
+#                     int(TransNum.k2a(bangou_tuple[2])))
+#         elif len(bangou_tuple) == 4:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])),
+#                     int(TransNum.k2a(bangou_tuple[2])),
+#                     int(TransNum.k2a(bangou_tuple[3])))
         else:
             assert(False, "条文番号の「の」が４以上は無理")
         self.midashi = None
