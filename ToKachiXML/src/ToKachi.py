@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.4.8'
+__version__ = '0.5.0'
 
 
 font_name = "MS ゴシック"
@@ -483,12 +483,13 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
         del md_kou
         for gou in kou.gou_list:
             # 号の処理
-            # TODO イ、ロ、ハを追加する。
             honbun = gou.get_honbun()   # イ、ロ、ハ付き
+#             print(honbun)
             md = Md(zeihou_mei, kubun,
                     (gou.jou_bangou_tuple, gou.kou_bangou,
                     gou.gou_bangou_tuple),
                     honbun)
+#                     honbun, None, None, gou)
             md.set_part(jou_jou.kubun)
             md.set_soku(soku)
             md.set_midashi(midashi)
@@ -673,6 +674,354 @@ def kakou1():
     d.dprint_method_end()
     return
 
+
+def kakou1_ji():
+    '''
+    加工１処理のうち、各法令内部の処理
+    '''
+    d.dprint_method_start()
+#     global folder_name
+    files = os.listdir(config.folder_name)
+#     if len(files):
+#         list_log = [ '加工１を行ないました。\n' ]
+#     else:
+#         list_log = [ '加工１を行なうファイルが' \
+#                 'ありませんでした。\n' ]
+    src_list_full = []
+    for file_name in files:
+        if os.path.isdir(os.path.join(
+                config.folder_name, file_name)):
+            continue
+        if (file_name[0] == '.') \
+                or (file_name[0] == '_'):
+            continue
+        if (file_name[-3:] != '.md'):
+            continue
+        if (file_name[-4:] == '_.md'):
+            # "所得税法第９条_.md"などは
+            # 加工対象外とする
+            continue
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+            continue
+        bun = Bun.md_to_bun(md)
+        dict_key = (bun.kubun_mei, bun.zeihou_mei,
+                md.soku,
+                bun.joubun_bangou)
+        if dict_key in config.jiko1_dict:
+            # 既に、jiko1_dictにデータあり
+            dict_value = config.jiko1_dict[dict_key]
+        else:
+            dict_value = []
+        if dict_key in config.jogai_dict:
+            jogai_list = config.jogai_dict[dict_key]
+        else:
+            jogai_list = []
+        src_list = bun.kakou1_ji(
+                dict_value,
+                jogai_list)
+        src_list_full.extend(src_list)
+        del src_list
+        md.set_file_bun(bun.get_kakou_bun())
+        md.save()
+#         joubun_mei = Bun.create_joubun_file_name(
+#                 bun.zeihou_mei, bun.kubun,
+#                 bun.soku,
+#                 bun.joubun_bangou)
+#         list_log.append('\t{}\n'.format(file_name))
+#     src_set = set(src_list_full)
+    del src_list_full
+#     if len(src_set) != 0:
+# #         list_log.append(
+# #                 '\t見つからない参照ファイル\n')
+#         flag = False
+#         for src_file in src_set:
+# #             d.dprint(src_file)
+#             full_name = os.path.join(config.folder_name,
+#                     src_file+'.md')
+#             if not os.path.isfile(full_name):
+#                 # 参照元のファイルがない
+#                 list_log.append('\t\t{}\n' \
+#                         .format(src_file))
+#                 flag = True
+#         if not flag:
+#             list_log.append(
+#                     '\t\tはありませんでした。\n')
+#     del src_set
+#     if (len(hou_rei_dict) > 0) or (len(hou_ki_dict) > 0) \
+#             or (len(rei_ki_dict) > 0):
+#         list_log.append(
+#                 '続けて、加工２を実行してください。\n')
+#     str_log = ''.join(list_log)
+#     set_log(str_log)
+    d.dprint_method_end()
+    return
+
+def kakou1_hou_rei():
+    '''
+    加工１処理のうち、法と施行令のリンクの処理
+    '''
+    d.dprint_method_start()
+#     global folder_name
+    files = os.listdir(config.folder_name)
+    global hou_rei_dict #, hou_ki_dict, rei_ki_dict
+    hou_rei_dict = {}
+#     hou_ki_dict = {}
+#     rei_ki_dict = {}
+#     if len(files):
+#         list_log = [ '加工１を行ないました。\n' ]
+#     else:
+#         list_log = [ '加工１を行なうファイルが' \
+#                 'ありませんでした。\n' ]
+    for file_name in files:
+        if os.path.isdir(os.path.join(
+                config.folder_name, file_name)):
+            continue
+        if (file_name[0] == '.') \
+                or (file_name[0] == '_'):
+            continue
+        if (file_name[-3:] != '.md'):
+            continue
+        if (file_name[-4:] == '_.md'):
+            # "所得税法第９条_.md"などは
+            # 加工対象外とする
+            continue
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+            continue
+        if md.kubun != Md.kubunRei:
+            continue
+        bun = Bun.md_to_bun(md)
+        dict_key = (bun.kubun_mei, bun.zeihou_mei,
+                md.soku,
+                bun.joubun_bangou)
+        if dict_key in config.jiko1_dict:
+            # 既に、jiko1_dictにデータあり
+            dict_value = config.jiko1_dict[dict_key]
+        else:
+            dict_value = []
+        if dict_key in config.jogai_dict:
+            jogai_list = config.jogai_dict[dict_key]
+        else:
+            jogai_list = []
+        ref_pair_list = bun.kakou1_hou_rei(
+                dict_value,
+                jogai_list)
+        md.set_file_bun(bun.get_kakou_bun())
+#         d.dprint_name("md.file_bun", md.file_bun)
+        md.save()
+
+        joubun_mei = Bun.create_joubun_file_name(
+                bun.zeihou_mei, bun.kubun,
+                bun.soku,
+                bun.joubun_bangou)
+        for ref_pair in ref_pair_list:
+            # ref_pair = (
+            #    "消費税", bun.kubunHou,
+            #    "＿", 条文番号タプル)
+#                 d.dprint(ref_pair)
+            if ref_pair[1] == bun.kubunHou:
+                if (ref_pair[0], ref_pair[2],
+                            ref_pair[3]) \
+                        in hou_rei_dict:
+                    value = hou_rei_dict[ref_pair[0],
+                            ref_pair[2], ref_pair[3]]
+                    value.append((joubun_mei,
+                            bun.joubun_bangou))
+                    hou_rei_dict[ref_pair[0],
+                            ref_pair[2], ref_pair[3]] \
+                            = value
+                else:
+                    hou_rei_dict[ref_pair[0],
+                            ref_pair[2], ref_pair[3]] \
+                            = [(joubun_mei,
+                            bun.joubun_bangou)]
+            else:
+                d.dprint(ref_pair)
+                d.dprint("===================")
+                continue
+#                     assert(False)
+#         list_log.append('\t{}\n'.format(file_name))
+    d.dprint_name("hou_rei_dict", hou_rei_dict)
+#     d.dprint_name("hou_ki_dict", hou_ki_dict)
+#     d.dprint_name("rei_ki_dict", rei_ki_dict)
+    d.dprint_method_end()
+    return
+
+def kakou1_hou_ki():
+    '''
+    加工１処理のうち、法と施行規則のリンクの処理
+    '''
+    d.dprint_method_start()
+#     global folder_name
+    files = os.listdir(config.folder_name)
+    global hou_ki_dict
+    hou_ki_dict = {}
+#     if len(files):
+#         list_log = [ '加工１を行ないました。\n' ]
+#     else:
+#         list_log = [ '加工１を行なうファイルが' \
+#                 'ありませんでした。\n' ]
+    for file_name in files:
+        if os.path.isdir(os.path.join(
+                config.folder_name, file_name)):
+            continue
+        if (file_name[0] == '.') \
+                or (file_name[0] == '_'):
+            continue
+        if (file_name[-3:] != '.md'):
+            continue
+        if (file_name[-4:] == '_.md'):
+            # "所得税法第９条_.md"などは
+            # 加工対象外とする
+            continue
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+            continue
+        if md.kubun != Md.kubunKi:
+            continue
+        bun = Bun.md_to_bun(md)
+        dict_key = (bun.kubun_mei, bun.zeihou_mei,
+                md.soku,
+                bun.joubun_bangou)
+        if dict_key in config.jiko1_dict:
+            # 既に、jiko1_dictにデータあり
+            dict_value = config.jiko1_dict[dict_key]
+        else:
+            dict_value = []
+        if dict_key in config.jogai_dict:
+            jogai_list = config.jogai_dict[dict_key]
+        else:
+            jogai_list = []
+        ref_pair_list = bun.kakou1_hou_ki(
+                dict_value,
+                jogai_list)
+        md.set_file_bun(bun.get_kakou_bun())
+#         d.dprint_name("md.file_bun", md.file_bun)
+        md.save()
+
+        joubun_mei = Bun.create_joubun_file_name(
+                bun.zeihou_mei, bun.kubun,
+                bun.soku,
+                bun.joubun_bangou)
+        for ref_pair in ref_pair_list:
+            if ref_pair[1] == bun.kubunHou:
+                if (ref_pair[0], ref_pair[2], ref_pair[3]) \
+                        in hou_ki_dict:
+                    value = hou_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]]
+                    value.append((joubun_mei,
+                            bun.joubun_bangou))
+                    hou_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]] \
+                            = value
+                else:
+                    hou_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]] \
+                            = [(joubun_mei,
+                            bun.joubun_bangou)]
+#             elif ref_pair[1] == bun.kubunRei:
+#                 if (ref_pair[0], ref_pair[2], ref_pair[3]) \
+#                         in rei_ki_dict:
+#                     value = rei_ki_dict[
+#                             ref_pair[0], ref_pair[2], ref_pair[3]]
+#                     value.append((joubun_mei,
+#                             bun.joubun_bangou))
+#                     rei_ki_dict[
+#                             ref_pair[0], ref_pair[2], ref_pair[3]] \
+#                             = value
+#                 else:
+#                     rei_ki_dict[
+#                             ref_pair[0], ref_pair[2], ref_pair[3]] \
+#                             = [(joubun_mei,
+#                             bun.joubun_bangou)]
+#             else:
+#                 d.dprint(ref_pair)
+#                 d.dprint("===================")
+#                 continue
+#                     assert(False)
+#         list_log.append('\t{}\n'.format(file_name))
+    d.dprint_name("hou_ki_dict", hou_ki_dict)
+#     d.dprint_name("rei_ki_dict", rei_ki_dict)
+    d.dprint_method_end()
+    return
+
+def kakou1_rei_ki():
+    '''
+    加工１処理のうち、法と施行規則のリンクの処理
+    '''
+    d.dprint_method_start()
+#     global folder_name
+    files = os.listdir(config.folder_name)
+    global rei_ki_dict
+    rei_ki_dict = {}
+#     if len(files):
+#         list_log = [ '加工１を行ないました。\n' ]
+#     else:
+#         list_log = [ '加工１を行なうファイルが' \
+#                 'ありませんでした。\n' ]
+    for file_name in files:
+        if os.path.isdir(os.path.join(
+                config.folder_name, file_name)):
+            continue
+        if (file_name[0] == '.') \
+                or (file_name[0] == '_'):
+            continue
+        if (file_name[-3:] != '.md'):
+            continue
+        if (file_name[-4:] == '_.md'):
+            # "所得税法第９条_.md"などは
+            # 加工対象外とする
+            continue
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+            continue
+        if md.kubun != Md.kubunKi:
+            continue
+        bun = Bun.md_to_bun(md)
+        dict_key = (bun.kubun_mei, bun.zeihou_mei,
+                md.soku,
+                bun.joubun_bangou)
+        if dict_key in config.jiko1_dict:
+            # 既に、jiko1_dictにデータあり
+            dict_value = config.jiko1_dict[dict_key]
+        else:
+            dict_value = []
+        if dict_key in config.jogai_dict:
+            jogai_list = config.jogai_dict[dict_key]
+        else:
+            jogai_list = []
+        ref_pair_list = bun.kakou1_rei_ki(
+                dict_value,
+                jogai_list)
+        md.set_file_bun(bun.get_kakou_bun())
+#         d.dprint_name("md.file_bun", md.file_bun)
+        md.save()
+
+        joubun_mei = Bun.create_joubun_file_name(
+                bun.zeihou_mei, bun.kubun,
+                bun.soku,
+                bun.joubun_bangou)
+        for ref_pair in ref_pair_list:
+            if ref_pair[1] == bun.kubunRei:
+                if (ref_pair[0], ref_pair[2], ref_pair[3]) \
+                        in rei_ki_dict:
+                    value = rei_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]]
+                    value.append((joubun_mei,
+                            bun.joubun_bangou))
+                    rei_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]] \
+                            = value
+                else:
+                    rei_ki_dict[
+                            ref_pair[0], ref_pair[2], ref_pair[3]] \
+                            = [(joubun_mei,
+                            bun.joubun_bangou)]
+#         list_log.append('\t{}\n'.format(file_name))
+    d.dprint_name("rei_ki_dict", rei_ki_dict)
+    d.dprint_method_end()
+    return
 
 def kakou2():
     # 除外リスト処理を検討
@@ -880,6 +1229,217 @@ def kakou2():
     str_log = ''.join(list_log)
     del list_log
     set_log(str_log)
+    d.dprint_method_end()
+    return
+
+
+def kakou2_hou_rei():
+    # 除外リスト処理を検討
+    d.dprint_method_start()
+    global hou_rei_dict #, hou_ki_dict, rei_ki_dict
+    # hou_ki_dict[('消費税法',((2,),1,(8,)))] =
+    #    ["消費税法施行規則第２条第１項",
+    #    (((2,),1,None))]
+    # 消費税法２①八の中の「財務省令で定める」は
+    # 消費税法施行規則２①に対応することを示している
+
+#     list_log = [ '加工２を行ないました。\n' ]
+
+        # dict_key = (bun.kubun_mei, bun.zeihou_mei,
+        #         md.soku,
+        #         bun.joubun_bangou)
+
+    for key_tuple, value_list in hou_rei_dict.items():
+        file_name = Md.create_file_name(
+                zeihou_mei=key_tuple[0],
+                kubun=Md.kubunHou,
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+#             list_log.append("\t【{}】などに対応する" \
+#                     "\n\t\tファイル【{}】" \
+#                     "が見つかりません、または、" \
+#                     "オープンに失敗しました。\n" \
+#                     "\t\t違う法令の可能性があります。\n". \
+#                     format(value_list[0][0], file_name))
+            continue
+        bun = Bun.md_to_bun(md)
+        # key のソートがNoneでエラー
+        zero_list = []  # 号のNoneを省く
+        for value in value_list:
+            if value[1][2] != None:
+                zero_list.append(value)
+            else:
+                zero_list.append(
+                        (value[0],
+                        (value[1][0], value[1][1])))
+        # del value_list
+        sort_list = sorted(zero_list,
+                reverse=False, key=lambda x:x[1])
+        del zero_list
+        jiko2_key = ('法', '法施行令',
+                key_tuple[0], key_tuple[1])
+        if jiko2_key in config.jiko2_dict:
+            values = config.jiko2_dict[jiko2_key]
+            value_list = sorted(values, reverse=True,
+                    key=lambda x:x[0])
+            for value in value_list:
+                data = (value[1][0], value[1][1])
+                sort_list.insert(value[0] - 1, data)
+        log_msg = bun.kakou2_rei(key_tuple[0],
+                sort_list)
+        if log_msg == None:
+            md.set_file_bun(bun.kakou_bun)
+            md.save()
+#             list_log.append('\t成功　')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+        else:
+#             list_log.append('\t失敗　')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+#             list_log.append('\t\t')
+#             list_log.extend(log_msg)
+            del log_msg
+#             for value in sort_list:
+#                 list_log.append('\t\t\t{}\n'. \
+#                         format(value[0]))
+        del sort_list
+#         del sort_list
+#     str_log = ''.join(list_log)
+#     del list_log
+#     set_log(str_log)
+    del hou_rei_dict
+    d.dprint_method_end()
+    return
+
+def kakou2_hou_ki():
+    # 除外リスト処理を検討
+    d.dprint_method_start()
+    global hou_ki_dict
+#     list_log = [ '加工２を行ないました。\n' ]
+    for key_tuple, value_list in hou_ki_dict.items():
+        file_name = Md.create_file_name(
+                zeihou_mei=key_tuple[0],
+                kubun=Md.kubunHou,
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+#             list_log.append("\t【{}】などに対応する" \
+#                     "\n\t\tファイル【{}】" \
+#                     "が見つかりません、または、" \
+#                     "オープンに失敗しました。\n" \
+#                     "\t\t違う法令の可能性があります。\n". \
+#                     format(value_list[0][0], file_name))
+            continue
+#         list_log.append("\t{}\n".format(file_name))
+        bun = Bun.md_to_bun(md)
+        zero_list = []  # 号のNoneを省く
+        for value in value_list:
+            if value[1][2] != None:
+                zero_list.append(value)
+            else:
+                zero_list.append(
+                        (value[0],
+                        (value[1][0], value[1][1])))
+        sort_list = sorted(zero_list,
+                reverse=False, key=lambda x:x[1])
+        del zero_list
+        jiko2_key = ('法', '法施行規則',
+                key_tuple[0], key_tuple[1])
+        if jiko2_key in config.jiko2_dict:
+            values = config.jiko2_dict[jiko2_key]
+            value_list = sorted(values, reverse=True,
+                    key=lambda x:x[0])
+            for value in value_list:
+                data = (value[1][0], value[1][1])
+                sort_list.insert(value[0], data)
+        log_msg = bun.kakou2_ki(key_tuple[0], sort_list)
+        if log_msg == None:
+            md.set_file_bun(bun.kakou_bun)
+            md.save()
+#             list_log.append('\t成功　')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+        else:
+#             list_log.append('\t失敗　')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+#             list_log.append('\t\t')
+#             list_log.extend(log_msg)
+            del log_msg
+#             for value in sort_list:
+#                 list_log.append('\t\t\t{}\n'. \
+#                         format(value[0]))
+        del sort_list
+    del hou_ki_dict
+    d.dprint_method_end()
+    return
+
+def kakou2_rei_ki():
+    # 除外リスト処理を検討
+    d.dprint_method_start()
+    global rei_ki_dict
+    for key_tuple, value_list in rei_ki_dict.items():
+        file_name = Md.create_file_name(
+                zeihou_mei=key_tuple[0],
+                kubun=Md.kubunRei,
+                soku=key_tuple[1],
+                joubun_bangou=key_tuple[2])
+        md = Md.load(config.folder_name, file_name)
+        if md == None:
+#             list_log.append("\t【{}】などに対応する" \
+#                     "\n\t\tファイル【{}】" \
+#                     "が見つかりません、または、" \
+#                     "オープンに失敗しました。\n" \
+#                     "\t\t違う法令の可能性があります。\n". \
+#                     format(value_list[0][0], file_name))
+            continue
+        bun = Bun.md_to_bun(md)
+        zero_list = []  # 号のNoneを省く
+        for value in value_list:
+            if value[1][2] != None:
+                zero_list.append(value)
+            else:
+                zero_list.append(
+                        (value[0],
+                        (value[1][0], value[1][1])))
+        sort_list = sorted(zero_list,
+                reverse=False, key=lambda x:x[1])
+        del zero_list
+        jiko2_key = ('法施行令', '法施行規則',
+                key_tuple[0], key_tuple[1])
+        if jiko2_key in config.jiko2_dict:
+            values = config.jiko2_dict[jiko2_key]
+            value_list = sorted(values, reverse=True,
+                    key=lambda x:x[0])
+            for value in value_list:
+                data = (value[1][0], value[1][1])
+                sort_list.insert(value[0], data)
+        log_msg = bun.kakou2_ki(key_tuple[0], sort_list)
+        if log_msg == None:
+            md.set_file_bun(bun.kakou_bun)
+            md.save()
+#             list_log.append('\t成功')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+        else:
+#             list_log.append('\t失敗')
+#             list_log.append(os.path.basename(md.file_name))
+#             list_log.append('\n')
+#             list_log.append('\t\t')
+#             list_log.extend(log_msg)
+            del log_msg
+#             for value in sort_list:
+#                 list_log.append('\t\t\t{}\n'. \
+#                         format(value[0]))
+        del sort_list
+#     str_log = ''.join(list_log)
+#     del list_log
+#     set_log(str_log)
+    del rei_ki_dict
     d.dprint_method_end()
     return
 

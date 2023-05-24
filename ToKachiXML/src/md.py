@@ -58,6 +58,8 @@ class Md(object):
     def __init__(self, zeihou_mei, kubun,
                 joubun_bangou, honbun,
                 file_name=None, file_bun=None):
+#                 file_name=None, file_bun=None,
+#                 jou_kou=None):
         '''
         zeihou_mei:
             税法名を示す文字列
@@ -81,6 +83,16 @@ class Md(object):
         self.kubun = kubun
         self.joubun_bangou = joubun_bangou
         self.honbun = honbun
+#         if jou_kou == None:
+#             self.honbun = honbun
+#         else:
+#             text = [honbun, '\n\n']
+#             for jou_koumoku in jou_kou.koumoku_list:
+#                 koumoku_honbun = \
+#                         jou_koumoku.get_honbun()
+#                 text.append(koumoku_honbun)
+#                 text.append('\n\n')
+#             self.honbun = ''.join(text)
         self.file_name = file_name
         self.file_bun = file_bun
         self.soku = None
@@ -155,6 +167,7 @@ class Md(object):
         list_bun = [str_title]
         list_bun.append('\n\n')
         list_bun.append(self.honbun)
+#         list_bun.append(self.get_honbun())
         list_bun.append('\n\n')
         str_tag = self.sakusei_tag(
                 self.zeihou_mei, kubun_mei,
@@ -187,25 +200,28 @@ class Md(object):
                 jou_jou.bangou_tuple,
                 jou_jou.midashi, '_')
         list_bun = [str_title]
-        list_bun.append('\n\n')
+#         list_bun.append('\n\n')
 #         list_bun.append(self.honbun)
 #         list_bun.append('\n')
         for kou in jou_jou.kou_list:
+            list_bun.append('\n\n')
             title = kou.get_item_title()
             if title != None:
                 list_bun.append(title)
+            else:
+                list_bun.append('１')
             list_bun.append('　')
             honbun = kou.honbun
+#             honbun = kou.get_honbun()
             list_bun.append(honbun)
-            list_bun.append('\n\n')
             gou_list = kou.get_gou_list()
             for gou in gou_list:
                 title = gou.get_item_title()
+                list_bun.append('\n\n')
                 list_bun.append(title)
                 list_bun.append('　')
                 honbun = gou.get_honbun()
                 list_bun.append(honbun)
-                list_bun.append('\n\n')
         list_bun.append('\n\n')
         str_tag = cls.sakusei_tag(
                 zeihou_mei, kubun_mei,
@@ -238,14 +254,14 @@ class Md(object):
         list_bun = [str_title]
         list_bun.append('\n\n')
         list_bun.append(self.honbun)
-        list_bun.append('\n\n')
+#         list_bun.append(self.get_honbun())
         for gou in gou_list:
             title = gou.get_item_title()
+            list_bun.append('\n\n')
             list_bun.append(title)
             list_bun.append('　')
             honbun = gou.get_honbun()
             list_bun.append(honbun)
-            list_bun.append('\n\n')
         list_bun.append('\n\n')
         str_tag = self.sakusei_tag(
                 self.zeihou_mei, kubun_mei,
@@ -284,7 +300,8 @@ class Md(object):
             kubun_file_mei = '法施行規則'
         # list_name はファイル名の生成用
         list_name = [zeihou_mei, kubun_file_mei]
-        if (soku == None) or (soku == "本則"):
+        if (soku == None) or \
+                (soku == "本則") or (soku == "＿"):
             list_name.append("＿")
         else:
             list_name.append(soku)
@@ -305,7 +322,7 @@ class Md(object):
             list_bun.append(zeihou_mei)
             list_bun.append(kubun_mei)
             if (soku != None) and \
-                    (soku != '本則'):
+                    (soku != '本則') and (soku != '＿'):
                 list_bun.append(soku)
             list_bun.extend(jou_list)
             # [消費税法第三十条](消費税法第三十条)第一項
@@ -313,12 +330,12 @@ class Md(object):
         else:
             # 号の場合
             # [消費税法第三十条第二項]
-            # (消費税法＿＿＿＿第三十条第二項)第三号
+            # (消費税法＿＿＿＿＿第三十条第二項)第三号
             list_bun.append('[')
             list_bun.append(zeihou_mei)
             list_bun.append(kubun_mei)
             if (soku != None) and \
-                    (soku != '本則'):
+                    (soku != '本則') and (soku != '＿'):
                 list_bun.append(soku)
             list_bun.append(jou_list[0])
             list_bun.append(jou_list[1])
@@ -350,7 +367,8 @@ class Md(object):
         list_bun = list_tag.copy()
         list_bun.append('\n')
 
-        if (soku != None) and (soku != "本則"):
+        if (soku != None) and \
+                    (soku != '本則') and (soku != '＿'):
             list_tag.append("/")
             list_tag.append(soku)
             list_bun.extend(list_tag)

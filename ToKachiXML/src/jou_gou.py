@@ -91,9 +91,9 @@ class Jou_gou(object):
         '''
 #         d.dprint_method_start()
 #         d.dprint(self.koumoku_list)
-        list_honbun = [self.honbun, '\n']
+        list_honbun = [self.honbun]
         for koumoku in self.koumoku_list:
-            list_honbun.append('\n{}'. \
+            list_honbun.append('\n\n{}'. \
                     format(koumoku.get_honbun()))
         str_honbun = ''.join(list_honbun)
         del list_honbun

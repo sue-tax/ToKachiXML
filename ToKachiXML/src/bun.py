@@ -239,6 +239,40 @@ class Bun(object):
         d.dprint_method_end()
         return (ref_list, src_list1)
 
+    def kakou1_ji(self, jiko1_list, jogai_list=[]):
+        '''
+        本文を解析して加工文を作る。
+        ただし、除外リストで指定されている文言は
+        加工しない。
+        加工１処理のうち、法令内部の処理のみ
+        返り値src_list1は参照している条文のリスト
+        不要かもしれない
+        '''
+        d.dprint_method_start()
+        jogai_index_list = []
+        for jogai in jogai_list:
+            index = self.honbun.find(jogai)
+            if index != -1:
+                jogai_index_list.append(
+                        (index, index + len(jogai)))
+        jogai_sort_list = sorted(jogai_index_list,
+                reverse=False, key=lambda x:x[0])
+        del jogai_index_list
+
+        self.kakou_bun = self.honbun
+        src_list1 = self.kakou_ji_hourei(
+                jogai_sort_list)
+        src_list2 = self.kakou_zenkoutou(
+                jogai_sort_list)
+        src_list1.extend(src_list2)
+        del src_list2
+        self.kakou_jiko(jiko1_list, jogai_list)
+#         ref_list = self.kakou_ta_hourei(
+#                 jogai_sort_list)
+        del jogai_sort_list
+        d.dprint_method_end()
+        return src_list1
+
 
     def kakou_ji_hourei(self, jogai_sort_list):
         '''
@@ -251,8 +285,6 @@ class Bun(object):
         リスト
         '''
         d.dprint_method_start()
-#         d.dprint(jogai_sort_list)
-
         kakou_list = []
         src_list = []
         index = 0
@@ -261,13 +293,9 @@ class Bun(object):
             m_jou = Bun.matchJiJou.search(
                     self.kakou_bun, index)
             if m_jou != None:
-#                 d.dprint(m_jou.group(0))
-#                 d.dprint(m_jou.start(0))
-#                 d.dprint(m_jou.end(0))
                 # 除外リストの確認
                 jogai_flag = False
                 for jogai in jogai_sort_list:
-#                     d.dprint(jogai)
                     if m_jou.end(0) < jogai[0]:
                         break
                     if m_jou.start(0) > jogai[1]:
@@ -279,7 +307,6 @@ class Bun(object):
                             [index:m_jou.end(0)])
                     index = m_jou.end(0)
                     continue
-#                 d.dprint("without jogai")
                 m_gou = Bun.matchJiJouKouGou.search(
                     self.kakou_bun, index)
                 if m_gou != None:
@@ -431,7 +458,6 @@ class Bun(object):
         index = 0
         length = len(self.kakou_bun)
         while index < length:
-#             d.dprint_name("index", index)
             m = Bun.matchZenkou.search(
                     self.kakou_bun, index)
             if m != None:
@@ -449,13 +475,11 @@ class Bun(object):
                             [index:m.end(0)])
                     index = m.end(0)
                     continue
-
                 kakou_list.append(
                         self.kakou_bun[index:m.start(0)])
                 kakou_list.append('[')
                 kakou_list.append(m.group(0))
                 kakou_list.append('](')
-#                 d.dprint(self.joubun_bangou)
                 if m.group(0) == '前条':
                     joubun_bangou = self.joubun_bangou
                     ref_bangou = (joubun_bangou[0],
@@ -484,18 +508,12 @@ class Bun(object):
                             continue
                         ref_jou = (jou_bangou[0] - 1,)
                     ref_bangou = (ref_jou, 1, None)
-#                     d.dprint("前条")
-#                     d.dprint(ref_bangou)
                 elif m.group(0) == '前項':
-#                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
                     ref_bangou = (joubun_bangou[0],
                             joubun_bangou[1] - 1,
                             None)
-#                     d.dprint("前項")
-#                     d.dprint(ref_bangou)
                 elif m.group(0) == '前号':
-#                     d.dprint(m.groups())
                     joubun_bangou = self.joubun_bangou
                     gou_bangou = joubun_bangou[2]
                     # 所得税でエラー 読替規定のせい
@@ -520,24 +538,16 @@ class Bun(object):
                     ref_bangou = (joubun_bangou[0],
                             joubun_bangou[1],
                             ref_gou)
-#                     d.dprint("前号")
-#                     d.dprint(ref_bangou)
                 elif m.group(0)[-1] == '項':
                     # 第Ｘ項
-#                     d.dprint(m.groups())
                     han = TransNum.k2a(m.group(6))
                     ref_bangou = (self.joubun_bangou[0],
                             han, None)
-#                     d.dprint("項")
-#                     d.dprint(ref_bangou)
                 elif m.group(0)[-1] == '号':
-#                     d.dprint(m.groups())
                     han = TransNum.k2a(m.group(8))
                     ref_bangou = (self.joubun_bangou[0],
                             self.joubun_bangou[1],
                             (han,))
-#                     d.dprint("号")
-#                     d.dprint(ref_bangou)
                 else:
                     assert("error")
                 jou_str = Bun.create_joubun_file_name(
@@ -582,6 +592,88 @@ class Bun(object):
 #         d.dprint(self.kakou_bun)
         d.dprint_method_end()
         return
+
+
+    def kakou1_hou_rei(self, jiko1_list, jogai_list=[]):
+        '''
+        本文を解析して加工文を作る。
+        ただし、除外リストで指定されている文言は
+        加工しない。
+        '''
+        d.dprint_method_start()
+#         d.dprint(jiko1_list)
+#         d.dprint(jogai_list)
+        jogai_index_list = []
+        for jogai in jogai_list:
+            index = self.honbun.find(jogai)
+            if index != -1:
+                jogai_index_list.append(
+                        (index, index + len(jogai)))
+        jogai_sort_list = sorted(jogai_index_list,
+                reverse=False, key=lambda x:x[0])
+        del jogai_index_list
+#         self.kakou_bun = self.honbun
+        ref_list = self.kakou_ta_hourei(
+                jogai_sort_list)
+        del jogai_sort_list
+#         d.dprint(self.kakou_bun)
+#         d.dprint(ref_list)
+        d.dprint_method_end()
+        return ref_list
+
+    def kakou1_hou_ki(self, jiko1_list, jogai_list=[]):
+        '''
+        本文を解析して加工文を作る。
+        ただし、除外リストで指定されている文言は
+        加工しない。
+        '''
+        d.dprint_method_start()
+#         d.dprint(jiko1_list)
+#         d.dprint(jogai_list)
+        jogai_index_list = []
+        for jogai in jogai_list:
+            index = self.honbun.find(jogai)
+            if index != -1:
+                jogai_index_list.append(
+                        (index, index + len(jogai)))
+        jogai_sort_list = sorted(jogai_index_list,
+                reverse=False, key=lambda x:x[0])
+        del jogai_index_list
+#         self.kakou_bun = self.honbun
+        ref_list = self.kakou_ta_hourei(
+                jogai_sort_list)
+        del jogai_sort_list
+#         d.dprint(self.kakou_bun)
+#         d.dprint(ref_list)
+        d.dprint_method_end()
+        return ref_list
+
+    def kakou1_rei_ki(self, jiko1_list, jogai_list=[]):
+        '''
+        本文を解析して加工文を作る。
+        ただし、除外リストで指定されている文言は
+        加工しない。
+        '''
+        d.dprint_method_start()
+#         d.dprint(jiko1_list)
+#         d.dprint(jogai_list)
+        jogai_index_list = []
+        for jogai in jogai_list:
+            index = self.honbun.find(jogai)
+            if index != -1:
+                jogai_index_list.append(
+                        (index, index + len(jogai)))
+        jogai_sort_list = sorted(jogai_index_list,
+                reverse=False, key=lambda x:x[0])
+        del jogai_index_list
+#         self.kakou_bun = self.honbun
+        ref_list = self.kakou_ta_hourei(
+                jogai_sort_list)
+        del jogai_sort_list
+#         d.dprint(self.kakou_bun)
+#         d.dprint(ref_list)
+        d.dprint_method_end()
+        return ref_list
 
 
     def kakou_ta_hourei(self, jogai_sort_list):
