@@ -202,6 +202,7 @@ class Jou_xml(object):
 
     def create_kou(self, soku, midashi,
             jou_bangou_tuple, paragraph):
+#         d.dprint_method_start()
         num = paragraph.get('Num')
         kou_bangou = int(num)
 #         d.dprint(jou_bangou_tuple)
@@ -210,12 +211,21 @@ class Jou_xml(object):
         sentences = paragraph.xpath(
                 './ParagraphSentence/Sentence')
         honbun_list = []
+#         for sentence in sentences:
+#             # 本文がないことがある
+#             # 例　相続税法附則平成一二年五月三一日
+#             # 　　　第３７条第１項
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
         for sentence in sentences:
-            # 本文がないことがある
-            # 例　相続税法附則平成一二年五月三一日
-            # 　　　第３７条第１項
-            if sentence.text != None:
-                honbun_list.append(sentence.text)
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
         # 表
         tables = paragraph.xpath('.//Table')
         table_text = self.create_table(tables)
@@ -238,12 +248,13 @@ class Jou_xml(object):
         kou.set_midashi(midashi)
         item_title = paragraph.xpath('./ParagraphNum')
         kou.set_item_title(item_title[0].text)
+#         d.dprint_method_end()
         return kou
 
     def create_gou(self, soku, midashi,
             jou_bangou_tuple, kou_bangou,
             item):
-        # d.dprint_method_start()
+#         d.dprint_method_start()
         num = item.get('Num')
         if ':' in num:  # 略や削除のときに、ある
             return None
@@ -253,9 +264,37 @@ class Jou_xml(object):
         sentences = item.xpath(
                 './ItemSentence/Sentence')
         honbun_list = []
+#         d.dprint(jou_bangou_tuple)
+#         d.dprint(num)
         for sentence in sentences:
-            if sentence.text != None:
-                honbun_list.append(sentence.text)
+#             d.dprint(sentence)
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+#             d.dprint(child_nodes)
+            for child_node in child_nodes:
+#                 d.dprint(child_node)
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+            # Rubyしか、取れない
+#             child_nodes = sentence.xpath('./*')
+#             d.dprint(child_nodes)
+#             for child_node in child_nodes:
+#                 d.dprint(child_node)
+#                 if child_node.text != None:
+#                     honbun_list.append(child_node.text)
+
+#            Ruby（拳）が取れない
+#             text_nodes = sentence.xpath('text()')
+#             d.dprint(text_nodes)
+#             for text_node in text_nodes:
+#                 d.dprint(text_node)
+#                 honbun_list.append(text_node)
+
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
         # 項目列記
         columns = item.xpath(
                 './ItemSentence/Column')
@@ -296,7 +335,7 @@ class Jou_xml(object):
         gou.set_midashi(midashi)
         item_title = item.xpath('./ItemTitle')
         gou.set_item_title(item_title[0].text)
-        # d.dprint_method_end()
+#         d.dprint_method_end()
         return gou
 
     def create_koumoku(self, soku, midashi,
@@ -309,9 +348,18 @@ class Jou_xml(object):
         sentences = subitem1.xpath(
                 './Subitem1Sentence/Sentence')
         honbun_list = []
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
         for sentence in sentences:
-            if sentence.text != None:
-                honbun_list.append(sentence.text)
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
         columns = subitem1.xpath(
                 './Subitem1Sentence/Column')
         for column in columns:
@@ -353,19 +401,34 @@ class Jou_xml(object):
         sentences = subitem2.xpath(
                 './Subitem2Sentence/Sentence')
         # TODO honbun_list
-        honbun = ''
+#         honbun = ''
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun = honbun + sentence.text
+        honbun_list = []
         for sentence in sentences:
-            if sentence.text != None:
-                honbun = honbun + sentence.text
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+
         columns = subitem2.xpath(
                 './Subitem2Sentence/Column')
         for column in columns:
             sentences = column.xpath('./Sentence')
             for sentence in sentences:
-                honbun = honbun + sentence.text
+#                 honbun = honbun + sentence.text
+                honbun_list.append(sentence.text)
         tables = subitem2.xpath('.//Table')
         table_text = self.create_table(tables)
-        honbun = honbun + table_text
+#         honbun = honbun + table_text
+        honbun_list.append(table_text)
+        honbun = ''.join(honbun_list)
+        del honbun_list
 
         koumoku3_list = []
         subitem3s = subitem2.xpath('./Subitem3')
@@ -381,6 +444,7 @@ class Jou_xml(object):
                 jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple, koumoku2_tuple,
                 honbun, koumoku3_list)
+        del koumoku3_list
         koumoku.set_soku(soku)
         koumoku.set_midashi(midashi)
         return koumoku
@@ -395,19 +459,33 @@ class Jou_xml(object):
 
         sentences = subitem3.xpath(
                 './Subitem3Sentence/Sentence')
-        honbun = ''
+#         honbun = ''
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun = honbun + sentence.text
+        honbun_list = []
         for sentence in sentences:
-            if sentence.text != None:
-                honbun = honbun + sentence.text
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
         columns = subitem3.xpath(
                 './Subitem3Sentence/Column')
         for column in columns:
             sentences = column.xpath('./Sentence')
             for sentence in sentences:
-                honbun = honbun + sentence.text
+#                 honbun = honbun + sentence.text
+                honbun_list.append(sentence.text)
         tables = subitem3.xpath('.//Table')
         table_text = self.create_table(tables)
-        honbun = honbun + table_text
+#         honbun = honbun + table_text
+        honbun_list.append(table_text)
+        honbun = ''.join(honbun_list)
+        del honbun_list
         koumoku4_list = []
         subitem4s = subitem3.xpath('./Subitem4')
         for subitem4 in subitem4s:
@@ -423,6 +501,7 @@ class Jou_xml(object):
                 jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple, koumoku3_tuple,
                 honbun, koumoku4_list)
+        del koumoku4_list
         koumoku.set_soku(soku)
         koumoku.set_midashi(midashi)
         return koumoku
@@ -592,20 +671,20 @@ class Jou_xml(object):
         return tup
 
 if __name__ == '__main__':
-    folder = '.\\org'
-#     folder = '.\\data'
+#     folder = '.\\org'
+    folder = '.\\data'
     config.folder_name = folder
 
 #     mei = '国税通則' # 済み
 #     mei = '国税徴収'
-    mei = '所得税'
-#     mei = '法人税'
+#     mei = '所得税' # 済み
+#     mei = '法人税' # 済み
 #     mei = '相続税' # 済み
 #     mei = '消費税' # 済み
-#     mei = '地方税'
+    mei = '地方税'
 #     mei = '租税特別措置'
-#     mei = '新型コロナ特例' # 済み
-#     mei = '会社'
+#     mei = '新型コロナ特例' #
+#     mei = '会社' # 済み
 
     jou_xml = Jou_xml(mei + '法.xml')
     jou_list = jou_xml.get_jou_list()

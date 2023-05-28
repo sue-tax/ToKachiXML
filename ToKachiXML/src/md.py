@@ -158,7 +158,7 @@ class Md(object):
         ファイルの内容(file_name,file_bun)を
         作成する
         '''
-        d.dprint_method_start()
+#         d.dprint_method_start()
         (file_name, str_title, kubun_mei, jou_list) = \
                 self.sakusei_title(folder,
                 self.zeihou_mei, self.kubun, self.soku,
@@ -180,7 +180,7 @@ class Md(object):
         self.file_bun = ''.join(list_bun)
         del list_bun
 
-        d.dprint_method_end()
+#         d.dprint_method_end()
         return
 
     @classmethod
@@ -193,7 +193,7 @@ class Md(object):
         項なら全部の号を含む。
         file_nameは、最後は「_.md」とする
         '''
-        d.dprint_method_start()
+#         d.dprint_method_start()
         (file_name, str_title, kubun_mei, jou_list) = \
                 cls.sakusei_title(folder,
                 zeihou_mei, kubun, jou_jou.soku,
@@ -234,7 +234,7 @@ class Md(object):
         file_bun = ''.join(list_bun)
         del list_bun
 
-        d.dprint_method_end()
+#         d.dprint_method_end()
         return (file_name, file_bun)
 
     def sakusei_file_full_kou(self, folder, gou_list):
@@ -245,7 +245,7 @@ class Md(object):
         項なら全部の号を含む。
         file_nameは、最後は「_.md」とする
         '''
-        d.dprint_method_start()
+#         d.dprint_method_start()
         (file_name, str_title, kubun_mei, jou_list) = \
                 self.sakusei_title(folder,
                 self.zeihou_mei, self.kubun, self.soku,
@@ -272,7 +272,7 @@ class Md(object):
         file_bun = ''.join(list_bun)
         del list_bun
 
-        d.dprint_method_end()
+#         d.dprint_method_end()
         return (self.file_name, file_bun)
 
 
@@ -284,7 +284,7 @@ class Md(object):
         ファイル名とファイル内のタイトルなどを
         作成する
         '''
-        d.dprint_method_start()
+#         d.dprint_method_start()
 #         d.dprint(kubun)
 #         d.dprint(soku)
 #         d.dprint(joubun_bangou)
@@ -356,7 +356,7 @@ class Md(object):
         del list_name
         str_title = ''.join(list_bun)
         del list_bun
-        d.dprint_method_end()
+#         d.dprint_method_end()
         return (file_name, str_title, kubun_mei, jou_list)
 
     @classmethod
