@@ -5,7 +5,7 @@ joucutter joubun_jouより移植
 '''
 
 import c
-# import d
+import d
 
 from TransNum import TransNum
 
@@ -30,42 +30,77 @@ class Jou_jou(object):
 
     def __init__(self, bangou_tuple, kou, sakujo=False):
         if len(bangou_tuple) == 1:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),)
+                    ,None,None)
         elif len(bangou_tuple) == 2:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])))
+                    ,None,None)
         elif len(bangou_tuple) == 3:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])),
                     int(TransNum.k2a(bangou_tuple[2])))
+                    ,None,None)
         elif len(bangou_tuple) == 4:
-            self.bangou_tuple = \
+            self.bangou_tuple = (\
                     (int(TransNum.k2a(bangou_tuple[0])),
                     int(TransNum.k2a(bangou_tuple[1])),
                     int(TransNum.k2a(bangou_tuple[2])),
                     int(TransNum.k2a(bangou_tuple[3])))
+                    ,None,None)
+#         if len(bangou_tuple) == 1:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),)
+#         elif len(bangou_tuple) == 2:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])))
+#         elif len(bangou_tuple) == 3:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])),
+#                     int(TransNum.k2a(bangou_tuple[2])))
+#         elif len(bangou_tuple) == 4:
+#             self.bangou_tuple = \
+#                     (int(TransNum.k2a(bangou_tuple[0])),
+#                     int(TransNum.k2a(bangou_tuple[1])),
+#                     int(TransNum.k2a(bangou_tuple[2])),
+#                     int(TransNum.k2a(bangou_tuple[3])))
         else:
             assert(False, "条文番号の「の」が４以上は無理")
         self.midashi = None
         self.kou_list = [kou]
         self.sakujo = sakujo
         self.kubun = None
+        self.soku = None
+        self.midashi = None
 
     def set_kubun(self, kubun):
+        d.dprint(kubun)
         self.kubun = kubun  # 編、章などの区分
-            # (None, '２', '３', None, None)
-            # 第２章第３節　編・款・目はなし
-#         self.kubun = (None, None, None, None, None)
-# 編、章、節、款、目
+
+    def set_soku(self, soku):
+        '''
+        soku:
+            本則、附則の別を示す文字列
+            ex. "本則" ,"附則平成２８年３月３１日"
+        '''
+        self.soku = soku
+
+    def get_soku(self):
+        return self.soku
 
     def tsuika_kou(self, kou):
         self.kou_list.append(kou)
 
     def set_midashi(self, midashi):
         self.midashi = midashi
+
+    def get_midashi(self):
+        return self.midashi
 
     def get_bangou_tuple(self):
         return self.bangou_tuple
@@ -234,3 +269,9 @@ class Jou_jou(object):
             str_data += kou.__str__()
         return str_data
 
+if __name__ == '__main__':
+    a = '附則'
+    b = '別表'
+    d.dprint(a)
+    d.dprint(b)
+    d.dprint(a>b)

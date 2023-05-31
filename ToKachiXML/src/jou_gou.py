@@ -50,6 +50,18 @@ class Jou_gou(object):
         self.honbun = honbun
         self.koumoku_list = koumoku_list
 #         d.dprint_method_end()
+        self.soku = None
+        self.midashi = None
+        self.item_title = None
+
+    def set_soku(self, soku):
+        self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
+
+    def set_item_title(self, item_title):
+        self.item_title = item_title
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)
@@ -70,15 +82,18 @@ class Jou_gou(object):
         for koumoku in self.koumoku_list:
             koumoku.set_kou_bangou(kou_bangou)
 
+    def get_item_title(self):
+        return self.item_title
+
     def get_honbun(self):
         '''
         自分の項目以下の本文も取得
         '''
 #         d.dprint_method_start()
 #         d.dprint(self.koumoku_list)
-        list_honbun = [self.honbun, '\n']
+        list_honbun = [self.honbun]
         for koumoku in self.koumoku_list:
-            list_honbun.append('\n{}'. \
+            list_honbun.append('\n\n{}'. \
                     format(koumoku.get_honbun()))
         str_honbun = ''.join(list_honbun)
         del list_honbun

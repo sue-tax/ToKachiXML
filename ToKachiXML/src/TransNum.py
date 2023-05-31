@@ -85,7 +85,8 @@ class TransNum(object):
                     list_jou.append('の')
                     zen = TransNum.i2z(bangou_tuple[0][3])
                     list_jou.append(zen)
-                    assert(len(bangou_tuple[0]) == 3)
+#                     print(bangou_tuple)
+                    assert(len(bangou_tuple[0]) == 4)
         # 項の処理
         if bangou_tuple[1] != None:
             list_kou = ['第']
@@ -136,11 +137,10 @@ class TransNum(object):
 #     def kansuji2arabic(cls, kstring: str, zenkaku=False):
     def k2a(cls, kstring: str, zenkaku=False):
         """漢数字をアラビア数字・全角数字に変換"""
-    #     print("kstring", kstring)
         if isinstance(kstring, int):
             return kstring
+        kstring = kstring.replace('〇', '十')
         transuji = kstring.translate(TransNum.tt_ksuji)
-    #     print("transuji", transuji)
         for suji in sorted(set(TransNum.re_suji.findall(transuji)),
                 key=lambda s: len(s),
                 reverse=True):
@@ -148,18 +148,16 @@ class TransNum(object):
                 arabic = TransNum._transvalue(suji,
                         TransNum.re_manshin, TransNum.TRANSMANS)
                 arabic = str(arabic)
-    #             print("arabic", arabic)
                 transuji = transuji.replace(suji, arabic)
-    #             print("transuji", transuji)
         if zenkaku:
             transuji = transuji.translate(TransNum.tt_zsuji)
-    #         print("全角", transuji)
         return transuji
 
 
     @classmethod
     def k2a_double(cls, kstring: str):
         """漢数字をアラビア数字と全角数字に変換"""
+        kstring = kstring.replace('〇', '十')
         transuji = kstring.translate(TransNum.tt_ksuji)
         for suji in sorted(set(TransNum.re_suji.findall(transuji)),
                 key=lambda s: len(s),
@@ -197,6 +195,10 @@ class TransNum(object):
 
 if __name__ == '__main__':
     moto = "七十七"
+    go = TransNum.k2a(moto, True)
+    print(go)
+#     moto = "国税通則法＿＿＿＿附則平成三一年三月二九日第１条第１項"
+    moto = "昭和四〇年三月二六日"
     go = TransNum.k2a(moto, True)
     print(go)
     jou = ((11,22,43),54,(125,1026,7,8))

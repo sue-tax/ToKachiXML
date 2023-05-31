@@ -40,6 +40,18 @@ class Jou_kou(object):
         self.kou_bangou = kou_bangou
         self.honbun = honbun
         self.gou_list = gou_list
+        self.soku = None
+        self.midashi = None
+        self.item_title = None
+
+    def set_soku(self, soku):
+        self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
+
+    def set_item_title(self, item_title):
+        self.item_title = item_title
 
     def tsuika_gou(self, gou):
         self.gou_list.append(gou)
@@ -55,6 +67,12 @@ class Jou_kou(object):
         self.jou_bangou_tuple = jou_bangou_tuple
         for gou in self.gou_list:
             gou.set_jou_bangou_tuple(jou_bangou_tuple)
+
+    def get_gou_list(self):
+        return self.gou_list
+
+    def get_item_title(self):
+        return self.item_title
 
     def __str__(self):
         str_data = "  " + str(self.jou_bangou_tuple) \
