@@ -9,6 +9,9 @@
 
 実際に作成したファイルをアップロードしています。一部、別表などの表の表示が異なるもの（上段、下段などのタイトルあり）があります。
 
+租税特別措置法と地方税法は、masterブランチの下のToKachiXMLにあります。
+https://github.com/sue-tax/ToKachiXML/tree/master/ToKachiXML
+
 ## ファイル名
 
 ### ＸＸＸＸ法＿＿＿＿＿第Ｘ条第Ｘ項
