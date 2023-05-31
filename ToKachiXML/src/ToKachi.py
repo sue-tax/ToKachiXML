@@ -57,7 +57,7 @@ from md import Md
 
 # 第九百三十条から第九百三十二条まで　削除
 
-__version__ = '0.5.0'
+__version__ = '0.5.2'
 
 
 font_name = "MS ゴシック"
@@ -680,14 +680,8 @@ def kakou1_ji():
     加工１処理のうち、各法令内部の処理
     '''
     d.dprint_method_start()
-#     global folder_name
     files = os.listdir(config.folder_name)
-#     if len(files):
-#         list_log = [ '加工１を行ないました。\n' ]
-#     else:
-#         list_log = [ '加工１を行なうファイルが' \
-#                 'ありませんでした。\n' ]
-    src_list_full = []
+#     src_list_full = []
     for file_name in files:
         if os.path.isdir(os.path.join(
                 config.folder_name, file_name)):
@@ -717,43 +711,15 @@ def kakou1_ji():
             jogai_list = config.jogai_dict[dict_key]
         else:
             jogai_list = []
-        src_list = bun.kakou1_ji(
+#         src_list = bun.kakou1_ji(
+        bun.kakou1_ji(
                 dict_value,
                 jogai_list)
-        src_list_full.extend(src_list)
-        del src_list
+#         src_list_full.extend(src_list)
+#         del src_list
         md.set_file_bun(bun.get_kakou_bun())
         md.save()
-#         joubun_mei = Bun.create_joubun_file_name(
-#                 bun.zeihou_mei, bun.kubun,
-#                 bun.soku,
-#                 bun.joubun_bangou)
-#         list_log.append('\t{}\n'.format(file_name))
-#     src_set = set(src_list_full)
-    del src_list_full
-#     if len(src_set) != 0:
-# #         list_log.append(
-# #                 '\t見つからない参照ファイル\n')
-#         flag = False
-#         for src_file in src_set:
-# #             d.dprint(src_file)
-#             full_name = os.path.join(config.folder_name,
-#                     src_file+'.md')
-#             if not os.path.isfile(full_name):
-#                 # 参照元のファイルがない
-#                 list_log.append('\t\t{}\n' \
-#                         .format(src_file))
-#                 flag = True
-#         if not flag:
-#             list_log.append(
-#                     '\t\tはありませんでした。\n')
-#     del src_set
-#     if (len(hou_rei_dict) > 0) or (len(hou_ki_dict) > 0) \
-#             or (len(rei_ki_dict) > 0):
-#         list_log.append(
-#                 '続けて、加工２を実行してください。\n')
-#     str_log = ''.join(list_log)
-#     set_log(str_log)
+#     del src_list_full
     d.dprint_method_end()
     return
 

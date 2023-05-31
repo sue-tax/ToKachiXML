@@ -46,8 +46,18 @@ class Bun(object):
             '(の([一二三四五六七八九十百千]+)' \
             '(の([一二三四五六七八九十百千]+))?)?)' )
 
+#     matchZenkou = re.compile(
+#             r'(?<![一二三四五六七八九十百千条項]) \
+#             (?<!\[)' \
+#             '((前条)|(前項)|(前号)' \
+#             '|(第([一二三四五六七八九十百千]+)項)' \
+#             '|(第([一二三四五六七八九十百千]+)号)' \
+#             ')' )
+    # 読替規定の　「前項　などは無視
+    # そうしないと、MemoryErrorが発生することあり
     matchZenkou = re.compile(
-            r'(?<![一二三四五六七八九十百千条項])(?<!\[)' \
+            r'(?<![一二三四五六七八九十百千条項])' \
+            '(?<!\[)(?<!「)' \
             '((前条)|(前項)|(前号)' \
             '|(第([一二三四五六七八九十百千]+)項)' \
             '|(第([一二三四五六七八九十百千]+)号)' \
@@ -260,18 +270,22 @@ class Bun(object):
         del jogai_index_list
 
         self.kakou_bun = self.honbun
-        src_list1 = self.kakou_ji_hourei(
+#         src_list1 = self.kakou_ji_hourei(
+#                 jogai_sort_list)
+#         src_list2 = self.kakou_zenkoutou(
+#                 jogai_sort_list)
+#         src_list1.extend(src_list2)
+#         del src_list2
+        self.kakou_ji_hourei(
                 jogai_sort_list)
-        src_list2 = self.kakou_zenkoutou(
+        self.kakou_zenkoutou(
                 jogai_sort_list)
-        src_list1.extend(src_list2)
-        del src_list2
         self.kakou_jiko(jiko1_list, jogai_list)
 #         ref_list = self.kakou_ta_hourei(
 #                 jogai_sort_list)
         del jogai_sort_list
         d.dprint_method_end()
-        return src_list1
+        return
 
 
     def kakou_ji_hourei(self, jogai_sort_list):
@@ -286,7 +300,7 @@ class Bun(object):
         '''
         d.dprint_method_start()
         kakou_list = []
-        src_list = []
+#         src_list = []
         index = 0
         length = len(self.kakou_bun)
         while index < length:
@@ -322,7 +336,7 @@ class Bun(object):
                                 m_gou)
                         kakou_list.append(link)
                         kakou_list.append(')')
-                        src_list.append(link)
+#                         src_list.append(link)
                         index = m_gou.end(0)
                         continue
                 m_kou = Bun.matchJiJouKou.search(
@@ -339,7 +353,7 @@ class Bun(object):
                                 m_kou)
                         kakou_list.append(link)
                         kakou_list.append(')')
-                        src_list.append(link)
+#                         src_list.append(link)
                         index = m_kou.end(0)
                         continue
                 kakou_list.append(
@@ -353,7 +367,7 @@ class Bun(object):
                 # ToKachiでは、常に第１項とする
                 kakou_list.append('第１項')
                 kakou_list.append(')')
-                src_list.append(link)
+#                 src_list.append(link)
                 index = m_jou.end(0)
                 continue
             break
@@ -362,7 +376,8 @@ class Bun(object):
         del kakou_list
 #         d.dprint(self.kakou_bun)
         d.dprint_method_end()
-        return src_list
+#         return src_list
+        return
 
 
     def translate_ji_jou(self, m):
@@ -451,10 +466,11 @@ class Bun(object):
         ただし、全てを網羅することは諦める
         自分で入力することで、フォローする
         '''
+        # TODO MemoryError 租税特別措置法
         d.dprint_method_start()
 #         d.dprint(jogai_sort_list)
         kakou_list = []
-        src_list = []
+#         src_list = []
         index = 0
         length = len(self.kakou_bun)
         while index < length:
@@ -479,6 +495,12 @@ class Bun(object):
                         self.kakou_bun[index:m.start(0)])
                 kakou_list.append('[')
                 kakou_list.append(m.group(0))
+                # TODO MemoryError 租税特別措置法
+#                 print(self.joubun_bangou)
+#                 if (self.joubun_bangou[0][0] == 0) \
+#                     and (self.joubun_bangou[1] == 7) \
+#                     and (self.joubun_bangou[2] == None):
+#                     print(kakou_list)
                 kakou_list.append('](')
                 if m.group(0) == '前条':
                     joubun_bangou = self.joubun_bangou
@@ -556,7 +578,7 @@ class Bun(object):
                         ref_bangou)
                 kakou_list.append(jou_str)
                 kakou_list.append(')')
-                src_list.append(jou_str)
+#                 src_list.append(jou_str)
                 index = m.end(0)
                 continue
             break
@@ -565,7 +587,8 @@ class Bun(object):
         del kakou_list
 #         d.dprint(self.kakou_bun)
         d.dprint_method_end()
-        return src_list
+#         return src_list
+        return
 
 
     def kakou_jiko(self, jiko1_list, jogai_list):

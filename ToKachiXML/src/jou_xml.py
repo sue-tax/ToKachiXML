@@ -25,7 +25,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.5.0'
+__version__ = '0.5.2'
 
 
 class Jou_xml(object):
@@ -515,18 +515,40 @@ class Jou_xml(object):
             # 最初の１行だけ表示が異なるので
             # 意図的に追加した
             # 要検討
-            if len(topColumns) == 2:
-                text_list.append('\n\n| 上段 | 下段 |\n' \
-                        + '| ---- | ---- |\n')
-            elif len(topColumns) == 3:
-                text_list.append(
-                    '\n\n| 上段 | 中段 | 下段 |\n' \
-                    + '| ---- | ---- | ---- |\n')
-            else:
-                text_list.append(
-                    '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-                    + '| ---- | ---- | ---- | ---- |\n')
-            for tableRow in tableRows:
+#             if len(topColumns) == 2:
+#                 text_list.append('\n\n| 上段 | 下段 |\n' \
+#                         + '| ---- | ---- |\n')
+#             elif len(topColumns) == 3:
+#                 text_list.append(
+#                     '\n\n| 上段 | 中段 | 下段 |\n' \
+#                     + '| ---- | ---- | ---- |\n')
+#             else:
+#                 text_list.append(
+#                     '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
+#                     + '| ---- | ---- | ---- | ---- |\n')
+            tableRow = tableRows[0]
+            tableColumns = tableRow.xpath(
+                    'TableColumn')
+            text_list.append('\n\n|')
+            row_list = [ '|' ]
+            for tableColumn in tableColumns:
+                sentences = tableColumn.xpath(
+                        './Sentence')
+                for sentence in sentences:
+                    if sentence.text != None:
+                        text_list.append(
+                                ' ' \
+                                + sentence.text \
+                                + ' |' )
+                    else:
+                        text_list.append(
+                                '    |')
+                    row_list.append(' ---- |')
+            text_list.append('\n')
+            row_list.append('\n')
+            text_list.extend(row_list)
+            del row_list
+            for tableRow in tableRows[1:]:
                 tableColumns = tableRow.xpath(
                         'TableColumn')
                 text_list.append('|')
@@ -570,22 +592,46 @@ class Jou_xml(object):
                         './Table')
                 for table in tables:
                     tableRows = table.xpath('TableRow')
-                    topRow = tableRows[0]
-                    topColumns = topRow.xpath(
+#                     topRow = tableRows[0]
+#                     topColumns = topRow.xpath(
+#                             'TableColumn')
+#                     if len(topColumns) == 2:
+#                         table_list = [
+#                                 '\n\n| 上段 | 下段 |\n' \
+#                                 + '| ---- | ---- |\n' ]
+#                     elif len(topColumns) == 3:
+#                         table_list = [
+#                             '\n\n| 上段 | 中段 | 下段 |\n' \
+#                             + '| ---- | ---- | ---- |\n' ]
+#                     else:
+#                         table_list = [
+#                             '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
+#                             + '| ---- | ---- | ---- | ---- |\n' ]
+                    table_list = []
+                    tableRow = tableRows[0]
+                    tableColumns = tableRow.xpath(
                             'TableColumn')
-                    if len(topColumns) == 2:
-                        table_list = [
-                                '\n\n| 上段 | 下段 |\n' \
-                                + '| ---- | ---- |\n' ]
-                    elif len(topColumns) == 3:
-                        table_list = [
-                            '\n\n| 上段 | 中段 | 下段 |\n' \
-                            + '| ---- | ---- | ---- |\n' ]
-                    else:
-                        table_list = [
-                            '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-                            + '| ---- | ---- | ---- | ---- |\n' ]
-                    for tableRow in tableRows:
+                    table_list.append('\n\n|')
+                    row_list = [ '|' ]
+                    for tableColumn in tableColumns:
+                        sentences = tableColumn.xpath(
+                                './Sentence')
+                        for sentence in sentences:
+                            if sentence.text != None:
+                                table_list.append(
+                                        ' ' \
+                                        + sentence.text \
+                                        + ' |' )
+                            else:
+                                table_list.append(
+                                        '    |')
+                        row_list.append(' ---- |')
+                    table_list.append('\n')
+                    row_list.append('\n')
+                    table_list.extend(row_list)
+                    del row_list
+
+                    for tableRow in tableRows[1:]:
                         tableColumns = tableRow.xpath('TableColumn')
                         table_list.append('|')
                         for tableColumn in tableColumns:
@@ -675,16 +721,19 @@ if __name__ == '__main__':
     folder = '.\\data'
     config.folder_name = folder
 
-#     mei = '国税通則' # 済み
-#     mei = '国税徴収'
-#     mei = '所得税' # 済み
-#     mei = '法人税' # 済み
-#     mei = '相続税' # 済み
-#     mei = '消費税' # 済み
-    mei = '地方税'
-#     mei = '租税特別措置'
-#     mei = '新型コロナ特例' #
-#     mei = '会社' # 済み
+#     mei = '国税通則' # 済み__version__ = '0.5.2'
+#     mei = '国税徴収' # 済み__version__ = '0.5.0'
+#     mei = '所得税' # 済み__version__ = '0.5.0'
+#     mei = '法人税' # 済み__version__ = '0.5.0'
+#     mei = '相続税' # 済み__version__ = '0.5.0'
+#     mei = '消費税' # 済み__version__ = '0.5.1'
+#     mei = '地方税' # 済み__version__ = '0.5.0'
+#     mei = '地方法人税' # 済み__version__ = '0.5.0'
+    mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
+#     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
+#     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
+#     mei = '会社' # 済み__version__ = '0.5.0'
+#     mei = '一般社団法人' # 済み__version__ = '0.5.1'
 
     jou_xml = Jou_xml(mei + '法.xml')
     jou_list = jou_xml.get_jou_list()
@@ -735,6 +784,7 @@ if __name__ == '__main__':
             kakou1_rei_ki, kakou2_rei_ki
 
     kakou1_ji()
+    print("kakou1_ji end")
     kakou1_hou_rei()
     kakou2_hou_rei()
     kakou1_hou_ki()
