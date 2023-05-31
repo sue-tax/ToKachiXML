@@ -4,9 +4,12 @@ Created on 2023/05/13
 @author: sue-t
 '''
 
+# TODO タグの下に、次の条　や　前の項　など
 import c
 import d
 import e
+
+import config
 
 from jou_jou import Jou_jou
 from jou_kou import Jou_kou
@@ -15,12 +18,14 @@ from jou_koumoku import Jou_koumoku
 
 from ToKachi import save_file
 
+from TransNum import TransNum
+
 import os
 from lxml import etree
 # import xml.etree.ElementTree as ET
+# from xml import etree
 
-
-__version__ = '0.4.3'
+__version__ = '0.5.2'
 
 
 class Jou_xml(object):
@@ -28,371 +33,671 @@ class Jou_xml(object):
     def __init__(self, file):
         tree = etree.parse(file)
         root = tree.getroot()
-
-        # 本則の条文のみ
         jou_list = []
-        d.dprint('//MainProvision//Article')
+        # 本則
         articles = tree.xpath('//MainProvision//Article')
+        self.proc_article("＿",  # "本則",
+                 jou_list, articles)
+        # 附則
+        fusokus = tree.xpath('//SupplProvision')
+        for fusoku in fusokus:
+            fusoku_name = fusoku.attrib.get("AmendLawNum")
+            if fusoku_name == None:
+                str_fusoku = "附則"
+            else:
+                index = fusoku_name.find("日")
+                # 漢数字を全角アラビア数字に
+                str_hizuke = fusoku_name[:index+1] \
+                        .replace('元', '一')
+                str_ara = TransNum.k2a(
+                        str_hizuke, True)
+                str_fusoku = "附則" + str_ara
+            articles = fusoku.xpath(".//Article")
+            if len(articles) != 0:
+                self.proc_article(str_fusoku,
+                        jou_list, articles)
+            else:
+                # 附則の中には、第Ｘ条がなく、
+                # 項のみの場合あり
+                self.proc_jou_nashi(str_fusoku,
+                        jou_list, fusoku)
+        self.tree = tree
+        self.jou_list = jou_list
 
+    def proc_jou_nashi(self, soku, jou_list, fusoku):
+        '''
+        条（article）がないfusokuで示される附則を
+        仮の条として、各項を処理して
+        jou_listに条文データを設定する。
+        sokuは、附則名を示す。
+        '''
+        paragraphs = fusoku.xpath('Paragraph')
+        kou = self.create_kou(soku, midashi=None,
+                jou_bangou_tuple=(0,),
+                paragraph=paragraphs[0])
+        jou = Jou_jou(bangou_tuple=(0,), kou=kou)
+        for paragraph in paragraphs[1:]:
+            kou = self.create_kou(soku,
+                    midashi=None,
+                    jou_bangou_tuple=(0,),
+                    paragraph=paragraph)
+            jou.tsuika_kou(kou)
+        jou.set_kubun((None, None,
+                None, None, None))
+        jou.set_soku(soku)
+#         jou.set_midashi(midashi)
+        jou_list.append(jou)
+
+
+    def proc_article(self, soku, jou_list, articles):
+        '''
+        articlesで示される本則、附則内の全条文を処理し、
+        jou_listに条文データを設定する。
+        sokuは、本則か附則（附則名）を示す。
+        '''
         for article in articles:
-#     def __init__(self, jou_bangou_tuple, kou, sakujo=False):
             num = article.get('Num')
             if ':' in num:
                 # '29:30' 削除のパターン
                 continue
             jou_bangou_tuple = self.num2tuple(num)
-
-            part = article.xpath('ancestor::Part')
+            # 編の名前
+            part = article.xpath('./ancestor::Part')
             if len(part) != 0:
-#                 d.dprint_data(part[0].text)
-                part_title = part[0].xpath('./PartTitle')
-#                 d.dprint_data(part_title[0].text)
-                part_str = part_title[0].text.replace('　', '')
+                part_title = part[0].xpath(
+                        './PartTitle')
+                if len(part_title) != 0:
+                    part_str = part_title[0]. \
+                            text.replace('　', '')
+                    part_str = TransNum.k2a(
+                            part_str, True)
+                else:
+                    part_str = None
             else:
                 part_str = None
-            chapter = article.xpath('ancestor::Chapter')
+            # 章の名前
+            chapter = article.xpath(
+                    './ancestor::Chapter')
             if len(chapter) != 0:
-#                 d.dprint_data(chapter[0].text)
-                chapter_title = chapter[0].xpath('./ChapterTitle')
-#                 d.dprint_data(chapter_title[0].text)
-                chapter_str = chapter_title[0].text.replace('　', '')
+                chapter_title = chapter[0].xpath(
+                        './ChapterTitle')
+                if len(chapter_title) != 0:
+                    chapter_str = chapter_title[0]. \
+                            text.replace('　', '')
+                    chapter_str = TransNum.k2a(
+                            chapter_str, True)
+                else:
+                    chapter_str = None
             else:
                 chapter_str = None
-            section = article.xpath('ancestor::Section')
+            # 節の名前
+            section = article.xpath(
+                    './ancestor::Section')
             if len(section) != 0:
-#                 d.dprint_data(section[0].text)
-                section_title = section[0].xpath('./SectionTitle')
-#                 d.dprint_data(section_title[0].text)
-                section_str = section_title[0].text.replace('　', '')
+                section_title = section[0].xpath(
+                        './SectionTitle')
+                if len(section_title) != 0:
+                    section_str = section_title[0]. \
+                            text.replace('　', '')
+                    section_str = TransNum.k2a(
+                            section_str, True)
+                else:
+                    section_str = None
             else:
                 section_str = None
-            subsection = article.xpath('ancestor::Subsection')
+            # 款の名前
+            subsection = article.xpath(
+                    './ancestor::Subsection')
             if len(subsection) != 0:
-#                 d.dprint_data(subsection[0].text)
-                subsection_title = subsection[0].xpath('./SubsectionTitle')
-#                 d.dprint_data(subsection_title[0].text)
-                subsection_str = subsection_title[0].text.replace('　', '')
+                subsection_title = subsection[0].xpath(
+                        './SubsectionTitle')
+                if len(subsection_title) != 0:
+                    subsection_str = subsection_title[0]. \
+                            text.replace('　', '')
+                    subsection_str = TransNum.k2a(
+                            subsection_str, True)
+                else:
+                    subsection_str = None
             else:
                 subsection_str = None
-            division = article.xpath('ancestor::Division')
+            # 目の名前
+            division = article.xpath(
+                    './ancestor::Division')
             if len(division) != 0:
-#                 d.dprint_data(division)
-                division_title = division[0].xpath('./DivisionTitle')
-#                 d.dprint_data(division_title[0].text)
-                division_str = division_title[0].text.replace('　', '')
+                division_title = division[0].xpath(
+                        './DivisionTitle')
+                if len(division_title) != 0:
+                    division_str = division_title[0]. \
+                            text.replace('　', '')
+                    division_str = TransNum.k2a(
+                            division_str, True)
+                else:
+                    division_str = None
             else:
                 division_str = None
-
-            title = article.xpath("ArticleTitle")
+            # 見出し
+            title = article.xpath("ArticleCaption")
             if len(title) != 0:
                 midashi = title[0].text
             else:
                 midashi = ""
-#             print(midashi)
 
             paragraphs = article.xpath('Paragraph')
-            kou = self.create_kou(jou_bangou_tuple,
+            kou = self.create_kou(soku, midashi,
+                    jou_bangou_tuple,
                     paragraphs[0])
             jou = Jou_jou(jou_bangou_tuple, kou)
+#             jou = Jou_jou((jou_bangou_tuple,), kou)
             for paragraph in paragraphs[1:]:
-                kou = self.create_kou(jou_bangou_tuple,
+                kou = self.create_kou(soku, midashi,
+                        jou_bangou_tuple,
                         paragraph)
                 jou.tsuika_kou(kou)
             jou.set_kubun((part_str, chapter_str,
                     section_str, subsection_str,
                     division_str))
-
+            jou.set_soku(soku)
+            jou.set_midashi(midashi)
             jou_list.append(jou)
-        self.tree = tree
-        self.jou_list = jou_list
 
-    def create_appdxTable(self):
-        # 別表はmdファイルを作るだけ
-        appdxTables = self.tree.xpath('//AppdxTable')
-        appdx_list = []
-        for appdxTable in appdxTables:
-            appd_titles = appdxTable.xpath("./AppdxTableTitle")
-            text = appd_titles[0].text + '\n'
-            d.dprint(appd_titles[0].text)
-
-            # TODO 順番を考慮する必要あり
-            table_structs = appdxTable.xpath('./TableStruct')
-            if (len(table_structs) == 1):
-                text = text + table_structs[0].text
-                tables = table_structs[0].xpath('./Table')
-                for table in tables:
-                    tableRows = table.xpath('TableRow')
-                    topRow = tableRows[0]
-                    topColumns = topRow.xpath('TableColumn')
-                    if len(topColumns) == 2:
-                        table_text = '\n\n| 上段 | 下段 |\n' \
-                                + '| ---- | ---- |\n'
-                    elif len(topColumns) == 3:
-                        table_text = '\n\n| 上段 | 中段 | 下段 |\n' \
-                                + '| ---- | ---- | ---- |\n'
-                    else:
-                        table_text = '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-                                + '| ---- | ---- | ---- | ---- |\n'
-                    d.dprint(table_text)
-                    for tableRow in tableRows:
-                        tableColumns = tableRow.xpath('TableColumn')
-                        table_text = table_text + '|'
-                        for tableColumn in tableColumns:
-                            sentences = tableColumn.xpath('./Sentence')
-                            for sentence in sentences:
-                                d.dprint(sentence.text)
-                                if sentence.text != None:
-                                    table_text = table_text + ' ' \
-                                            + sentence.text + ' |'
-                                else:
-                                    # 上段が２つ合わせて、下段が1つ
-                                    table_text = table_text \
-                                            + '    |'
-
-                        table_text = table_text + '\n'
-                    text = text + table_text
-
-            items = appdxTable.xpath('.//Item')
-            for item in items:
-                titles = item.xpath('./ItemTitle')
-                if (len(titles) != 0) and \
-                         (titles[0].text != None):
-                    text = text + titles[0].text + '　'
-                sentences = item.xpath('./ItemSentence/Sentence')
-                for sentence in sentences:
-#                     print(sentence.text)
-                    text = text + sentence.text
-                text = text + '\n'
-                subitem1s = item.xpath('./Subitem1')
-#                 print(subitems)
-                for subitem1 in subitem1s:
-#                     print(subitem)
-                    text = text + '　'
-                    titles = subitem1.xpath('./Subitem1Title')
-                    if (len(titles) != 0) and \
-                            (titles[0].text != None):
-                        text = text + titles[0].text + '　'
-                    sentences = subitem1.xpath(
-                        './Subitem1Sentence/Sentence')
-                    for sentence in sentences:
-                        text = text + sentence.text
-                    text = text + '\n'
-                    subitem2s = subitem1.xpath('./Subitem2')
-                    for subitem2 in subitem2s:
-                        text = text + '　　'
-                        titles = subitem2.xpath('./Subitem2Title')
-                        if (len(titles) != 0) and \
-                                 (titles[0].text != None):
-                            text = text + titles[0].text + '　'
-                        sentences = subitem2.xpath(
-                            './Subitem2Sentence/Sentence')
-                        for sentence in sentences:
-                            text = text + sentence.text
-                        text = text + '\n'
-            appdx_list.append((appd_titles[0].text, text))
-        return appdx_list
-
-
-    def create_kou(self, jou_bangou_tuple, paragraph):
+    def create_kou(self, soku, midashi,
+            jou_bangou_tuple, paragraph):
+#         d.dprint_method_start()
         num = paragraph.get('Num')
         kou_bangou = int(num)
+#         d.dprint(jou_bangou_tuple)
+#         d.dprint(kou_bangou)
 
         sentences = paragraph.xpath(
                 './ParagraphSentence/Sentence')
-        honbun = ''
+        honbun_list = []
+#         for sentence in sentences:
+#             # 本文がないことがある
+#             # 例　相続税法附則平成一二年五月三一日
+#             # 　　　第３７条第１項
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
         for sentence in sentences:
-            honbun = honbun + sentence.text
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+        # 表
+        tables = paragraph.xpath('.//Table')
+        table_text = self.create_table(tables)
+        honbun_list.append(table_text)
 
         gou_list = []
         items = paragraph.xpath('.//Item')
         for item in items:
             gou = self.create_gou(
+                    soku, midashi,
                     jou_bangou_tuple, kou_bangou,
                     item)
-            gou_list.append(gou)
+            if gou != None:
+                gou_list.append(gou)
 
+        honbun = ''.join(honbun_list)
         kou = Jou_kou(jou_bangou_tuple, kou_bangou,
                       honbun, gou_list)
+        kou.set_soku(soku)
+        kou.set_midashi(midashi)
+        item_title = paragraph.xpath('./ParagraphNum')
+        kou.set_item_title(item_title[0].text)
+#         d.dprint_method_end()
         return kou
 
-    def create_gou(self, jou_bangou_tuple, kou_bangou,
+    def create_gou(self, soku, midashi,
+            jou_bangou_tuple, kou_bangou,
             item):
-        d.dprint_method_start()
+#         d.dprint_method_start()
         num = item.get('Num')
+        if ':' in num:  # 略や削除のときに、ある
+            return None
         gou_bangou_tuple = self.num2tuple(num)
-
-        sentences = item.xpath('./ItemSentence/Sentence')
-        honbun = ''
+        # 文、項目列記、表があるようだ
+        # TODO 本来は順番を考慮して処理すべき
+        sentences = item.xpath(
+                './ItemSentence/Sentence')
+        honbun_list = []
+#         d.dprint(jou_bangou_tuple)
+#         d.dprint(num)
         for sentence in sentences:
-            honbun = honbun + sentence.text
-        d.dprint_name('honbun', honbun)
+#             d.dprint(sentence)
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+#             d.dprint(child_nodes)
+            for child_node in child_nodes:
+#                 d.dprint(child_node)
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+            # Rubyしか、取れない
+#             child_nodes = sentence.xpath('./*')
+#             d.dprint(child_nodes)
+#             for child_node in child_nodes:
+#                 d.dprint(child_node)
+#                 if child_node.text != None:
+#                     honbun_list.append(child_node.text)
 
-        columns = item.xpath('./ItemSentence/Column')
+#            Ruby（拳）が取れない
+#             text_nodes = sentence.xpath('text()')
+#             d.dprint(text_nodes)
+#             for text_node in text_nodes:
+#                 d.dprint(text_node)
+#                 honbun_list.append(text_node)
+
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
+        # 項目列記
+        columns = item.xpath(
+                './ItemSentence/Column')
         if len(columns) != 0:
             text_column = []
             for column in columns:
-                sentences = column.xpath('./Sentence')
+                sentences = column.xpath(
+                        './Sentence')
                 text_sentence = ''
                 for sentence in sentences:
-                    text_sentence = text_sentence + sentence.text
+                    if sentence.text != None:
+                        text_sentence = \
+                                text_sentence + \
+                                sentence.text
                 text_column.append(text_sentence)
             text_columns = '　'.join(text_column)
-            honbun = honbun + text_columns
-
+            honbun_list.append(text_columns)
+        # 表
         tables = item.xpath('.//Table')
-        for table in tables:
-            tableRows = table.xpath('TableRow')
-            topRow = tableRows[0]
-            topColumns = topRow.xpath('TableColumn')
-            if len(topColumns) == 2:
-                table_text = '\n\n| 上段 | 下段 |\n' \
-                        + '| ---- | ---- |\n'
-            elif len(topColumns) == 3:
-                table_text = '\n\n| 上段 | 中段 | 下段 |\n' \
-                        + '| ---- | ---- | ---- |\n'
-            else:
-                table_text = '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-                        + '| ---- | ---- | ---- | ---- |\n'
-            for tableRow in tableRows:
-                tableColumns = tableRow.xpath('TableColumn')
-                table_text = table_text + '|'
-                for tableColumn in tableColumns:
-                    sentences = tableColumn.xpath('./Sentence')
-                    for sentence in sentences:
-                        if sentence.text != None:
-                            table_text = table_text + ' ' \
-                                    + sentence.text + ' |'
-                        else:
-                            table_text = table_text \
-                                    + '    |'
-                table_text = table_text + '\n'
-            honbun = honbun + table_text
+        table_text = self.create_table(tables)
+        honbun_list.append(table_text)
 
         koumoku_list = []
         subitem1s = item.xpath('./Subitem1')
         for subitem1 in subitem1s:
             koumoku = self.create_koumoku(
+                    soku, midashi,
                     jou_bangou_tuple, kou_bangou,
                     gou_bangou_tuple,
                     subitem1)
             koumoku_list.append(koumoku)
 
+        honbun = ''.join(honbun_list)
         gou = Jou_gou(jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple,
                 honbun, koumoku_list)
-        d.dprint_method_end()
+        gou.set_soku(soku)
+        gou.set_midashi(midashi)
+        item_title = item.xpath('./ItemTitle')
+        gou.set_item_title(item_title[0].text)
+#         d.dprint_method_end()
         return gou
 
-    def create_koumoku(self, jou_bangou_tuple, kou_bangou,
+    def create_koumoku(self, soku, midashi,
+            jou_bangou_tuple, kou_bangou,
             gou_bangou_tuple, subitem1):
         # イ、ロ、ハ
         titles = subitem1.xpath('./Subitem1Title')
         koumoku_tuple = (titles[0].text,)
 
-        sentences = subitem1.xpath('./Subitem1Sentence/Sentence')
-        honbun = ''
+        sentences = subitem1.xpath(
+                './Subitem1Sentence/Sentence')
+        honbun_list = []
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun_list.append(sentence.text)
         for sentence in sentences:
-            honbun = honbun + sentence.text
-
-        columns = subitem1.xpath('./ItemSentence/Column')
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+        columns = subitem1.xpath(
+                './Subitem1Sentence/Column')
         for column in columns:
             sentences = column.xpath('./Sentence')
             for sentence in sentences:
-                honbun = honbun + sentence.text
-
+                honbun_list.append(sentence.text)
         tables = subitem1.xpath('.//Table')
-        for table in tables:
-            tableRows = table.xpath('TableRow')
-            topRow = tableRows[0]
-            topColumns = topRow.xpath('TableColumn')
-            if len(topColumns) == 2:
-                table_text = '\n\n| 上段 | 下段 |\n' \
-                        + '| ---- | ---- |\n'
-            elif len(topColumns) == 3:
-                table_text = '\n\n| 上段 | 中段 | 下段 |\n' \
-                        + '| ---- | ---- | ---- |\n'
-            else:
-                table_text = '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-                        + '| ---- | ---- | ---- | ---- |\n'
-            for tableRow in tableRows:
-                tableColumns = tableRow.xpath('TableColumn')
-                table_text = table_text + '|'
-                for tableColumn in tableColumns:
-                    sentences = tableColumn.xpath('./Sentence')
-                    for sentence in sentences:
-                        table_text = ' ' + table_text \
-                                + sentence.text + ' |'
-                table_text = table_text + '\n'
-            honbun = honbun + table_text
-
+        table_text = self.create_table(tables)
+        honbun_list.append(table_text)
 
         koumoku2_list = []
         subitem2s = subitem1.xpath('./Subitem2')
         for subitem2 in subitem2s:
             koumoku2 = self.create_koumoku2(
+                    soku, midashi,
                     jou_bangou_tuple, kou_bangou,
                     gou_bangou_tuple, koumoku_tuple,
                     subitem2)
             koumoku2_list.append(koumoku2)
 
+        honbun = ''.join(honbun_list)
         koumoku = Jou_koumoku(jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple, koumoku_tuple,
                 honbun, koumoku2_list)
+        # ToKachiでは号までなので、不要だが
+        koumoku.set_soku(soku)
+        koumoku.set_midashi(midashi)
         return koumoku
 
-    def create_koumoku2(self, jou_bangou_tuple, kou_bangou,
+    def create_koumoku2(self, soku, midashi,
+            jou_bangou_tuple, kou_bangou,
             gou_bangou_tuple, koumoku_tuple, subitem2):
         # （２）
-        titles = subitem2.xpath('./Subitem2Title')
-        koumoku2_tuple = koumoku_tuple + (titles[0].text,)
+        titles = subitem2.xpath(
+                './Subitem2Title')
+        koumoku2_tuple = koumoku_tuple \
+                + (titles[0].text,)
 
-        sentences = subitem2.xpath('./Subitem2Sentence/Sentence')
-        honbun = ''
+        sentences = subitem2.xpath(
+                './Subitem2Sentence/Sentence')
+        # TODO honbun_list
+#         honbun = ''
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun = honbun + sentence.text
+        honbun_list = []
         for sentence in sentences:
-            honbun = honbun + sentence.text
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+
+        columns = subitem2.xpath(
+                './Subitem2Sentence/Column')
+        for column in columns:
+            sentences = column.xpath('./Sentence')
+            for sentence in sentences:
+#                 honbun = honbun + sentence.text
+                honbun_list.append(sentence.text)
+        tables = subitem2.xpath('.//Table')
+        table_text = self.create_table(tables)
+#         honbun = honbun + table_text
+        honbun_list.append(table_text)
+        honbun = ''.join(honbun_list)
+        del honbun_list
 
         koumoku3_list = []
         subitem3s = subitem2.xpath('./Subitem3')
         for subitem3 in subitem3s:
             koumoku3 = self.create_koumoku3(
+                    soku, midashi,
                     jou_bangou_tuple, kou_bangou,
                     gou_bangou_tuple, koumoku2_tuple,
                     subitem3)
             koumoku3_list.append(koumoku3)
 
-        koumoku = Jou_koumoku(jou_bangou_tuple, kou_bangou,
+        koumoku = Jou_koumoku(
+                jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple, koumoku2_tuple,
                 honbun, koumoku3_list)
+        del koumoku3_list
+        koumoku.set_soku(soku)
+        koumoku.set_midashi(midashi)
         return koumoku
 
-    def create_koumoku3(self, jou_bangou_tuple, kou_bangou,
+    def create_koumoku3(self, soku, midashi,
+            jou_bangou_tuple, kou_bangou,
             gou_bangou_tuple, koumoku_tuple, subitem3):
-        #
+        # ⅰ ?
         titles = subitem3.xpath('./Subitem3Title')
-        koumoku3_tuple = koumoku_tuple + (titles[0].text,)
+        koumoku3_tuple = koumoku_tuple \
+                + (titles[0].text,)
 
-        sentences = subitem3.xpath('./Subitem3Sentence/Sentence')
-        honbun = ''
+        sentences = subitem3.xpath(
+                './Subitem3Sentence/Sentence')
+#         honbun = ''
+#         for sentence in sentences:
+#             if sentence.text != None:
+#                 honbun = honbun + sentence.text
+        honbun_list = []
         for sentence in sentences:
-            honbun = honbun + sentence.text
-
+            # Rubyに対応
+            child_nodes = sentence.xpath('./node()')
+            for child_node in child_nodes:
+                if isinstance(child_node, str):
+                    honbun_list.append(child_node)
+                else:
+                    if child_node.text != None:
+                        honbun_list.append(child_node.text)
+        columns = subitem3.xpath(
+                './Subitem3Sentence/Column')
+        for column in columns:
+            sentences = column.xpath('./Sentence')
+            for sentence in sentences:
+#                 honbun = honbun + sentence.text
+                honbun_list.append(sentence.text)
+        tables = subitem3.xpath('.//Table')
+        table_text = self.create_table(tables)
+#         honbun = honbun + table_text
+        honbun_list.append(table_text)
+        honbun = ''.join(honbun_list)
+        del honbun_list
         koumoku4_list = []
         subitem4s = subitem3.xpath('./Subitem4')
         for subitem4 in subitem4s:
+            # TODO これでは対応できない
+            # Sbuitem10まで一応ある
             koumoku4 = self.create_koumoku3(
                     jou_bangou_tuple, kou_bangou,
                     gou_bangou_tuple, koumoku3_tuple,
                     subitem4)
             koumoku4_list.append(koumoku4)
 
-        koumoku = Jou_koumoku(jou_bangou_tuple, kou_bangou,
+        koumoku = Jou_koumoku(
+                jou_bangou_tuple, kou_bangou,
                 gou_bangou_tuple, koumoku3_tuple,
                 honbun, koumoku4_list)
+        del koumoku4_list
+        koumoku.set_soku(soku)
+        koumoku.set_midashi(midashi)
         return koumoku
+
+    def create_table(self, tables):
+        text_list = []
+        for table in tables:
+            tableRows = table.xpath('TableRow')
+            topRow = tableRows[0]
+            topColumns = topRow.xpath('TableColumn')
+            # 最初の１行だけ表示が異なるので
+            # 意図的に追加した
+            # 要検討
+#             if len(topColumns) == 2:
+#                 text_list.append('\n\n| 上段 | 下段 |\n' \
+#                         + '| ---- | ---- |\n')
+#             elif len(topColumns) == 3:
+#                 text_list.append(
+#                     '\n\n| 上段 | 中段 | 下段 |\n' \
+#                     + '| ---- | ---- | ---- |\n')
+#             else:
+#                 text_list.append(
+#                     '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
+#                     + '| ---- | ---- | ---- | ---- |\n')
+            tableRow = tableRows[0]
+            tableColumns = tableRow.xpath(
+                    'TableColumn')
+            text_list.append('\n\n|')
+            row_list = [ '|' ]
+            for tableColumn in tableColumns:
+                sentences = tableColumn.xpath(
+                        './Sentence')
+                for sentence in sentences:
+                    if sentence.text != None:
+                        text_list.append(
+                                ' ' \
+                                + sentence.text \
+                                + ' |' )
+                    else:
+                        text_list.append(
+                                '    |')
+                    row_list.append(' ---- |')
+            text_list.append('\n')
+            row_list.append('\n')
+            text_list.extend(row_list)
+            del row_list
+            for tableRow in tableRows[1:]:
+                tableColumns = tableRow.xpath(
+                        'TableColumn')
+                text_list.append('|')
+                for tableColumn in tableColumns:
+                    sentences = tableColumn.xpath(
+                            './Sentence')
+                    for sentence in sentences:
+                        if sentence.text != None:
+                            text_list.append(
+                                    ' ' \
+                                    + sentence.text \
+                                    + ' |' )
+                        else:
+                            text_list.append(
+                                    '    |')
+                text_list.append('\n')
+        text = ''.join(text_list)
+        return text
+
+    def create_appdxTable(self):
+        # 別表はmdファイルを作るだけ
+
+        # TODO 所得税法別表３，５などが対応できない
+        # colspan, rawspanなどの解析が必要
+
+        appdxTables = self.tree.xpath('//AppdxTable')
+        appdx_list = []
+        for appdxTable in appdxTables:
+            appd_titles = appdxTable.xpath(
+                    "./AppdxTableTitle")
+            str_title = TransNum.k2a(
+                    appd_titles[0].text, True)
+            text_list = [str_title, '\n']
+
+            # TODO 順番を考慮する必要あり
+            table_structs = appdxTable.xpath(
+                    './TableStruct')
+            if (len(table_structs) == 1):
+                text_list.append(table_structs[0].text)
+                tables = table_structs[0].xpath(
+                        './Table')
+                for table in tables:
+                    tableRows = table.xpath('TableRow')
+#                     topRow = tableRows[0]
+#                     topColumns = topRow.xpath(
+#                             'TableColumn')
+#                     if len(topColumns) == 2:
+#                         table_list = [
+#                                 '\n\n| 上段 | 下段 |\n' \
+#                                 + '| ---- | ---- |\n' ]
+#                     elif len(topColumns) == 3:
+#                         table_list = [
+#                             '\n\n| 上段 | 中段 | 下段 |\n' \
+#                             + '| ---- | ---- | ---- |\n' ]
+#                     else:
+#                         table_list = [
+#                             '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
+#                             + '| ---- | ---- | ---- | ---- |\n' ]
+                    table_list = []
+                    tableRow = tableRows[0]
+                    tableColumns = tableRow.xpath(
+                            'TableColumn')
+                    table_list.append('\n\n|')
+                    row_list = [ '|' ]
+                    for tableColumn in tableColumns:
+                        sentences = tableColumn.xpath(
+                                './Sentence')
+                        for sentence in sentences:
+                            if sentence.text != None:
+                                table_list.append(
+                                        ' ' \
+                                        + sentence.text \
+                                        + ' |' )
+                            else:
+                                table_list.append(
+                                        '    |')
+                        row_list.append(' ---- |')
+                    table_list.append('\n')
+                    row_list.append('\n')
+                    table_list.extend(row_list)
+                    del row_list
+
+                    for tableRow in tableRows[1:]:
+                        tableColumns = tableRow.xpath('TableColumn')
+                        table_list.append('|')
+                        for tableColumn in tableColumns:
+                            sentences = tableColumn.xpath(
+                                    './Sentence')
+                            for sentence in sentences:
+                                if sentence.text != None:
+                                    table_list.append(' ')
+                                    table_list.append(
+                                            sentence.text)
+                                    table_list.append(' |')
+                                else:
+                                    # 上段が２つ合わせて、下段が1つ
+                                    table_list.append('    |')
+                        table_list.append('\n')
+                    text_list.extend(table_list)
+            items = appdxTable.xpath('.//Item')
+            for item in items:
+                titles = item.xpath('./ItemTitle')
+                if (len(titles) != 0) and \
+                         (titles[0].text != None):
+                    text_list.append(titles[0].text)
+                    text_list.append('　')
+                sentences = item.xpath(
+                        './ItemSentence/Sentence')
+                for sentence in sentences:
+                    text_list.append(sentence.text)
+                text_list.append('\n')
+                subitem1s = item.xpath('./Subitem1')
+                for subitem1 in subitem1s:
+                    text_list.append('　')
+                    titles = subitem1.xpath(
+                            './Subitem1Title')
+                    if (len(titles) != 0) and \
+                            (titles[0].text != None):
+                        text_list.append(titles[0].text)
+                        text_list.append('　')
+                    sentences = subitem1.xpath(
+                        './Subitem1Sentence/Sentence')
+                    for sentence in sentences:
+                        text_list.append(sentence.text)
+                    text_list.append('\n')
+                    subitem2s = subitem1.xpath(
+                            './Subitem2')
+                    for subitem2 in subitem2s:
+                        text_list.append('　　')
+                        titles = subitem2.xpath(
+                                './Subitem2Title')
+                        if (len(titles) != 0) and \
+                                 (titles[0].text != None):
+                            text_list.append(
+                                    titles[0].text)
+                            text_list.append('　')
+                        sentences = subitem2.xpath(
+                                './Subitem2Sentence/Sentence')
+                        for sentence in sentences:
+                            text_list.append(
+                                    sentence.text)
+                        text_list.append('\n')
+            text = ''.join(text_list)
+            appdx_list.append((str_title, text))
+        return appdx_list
+
 
     def get_jou_list(self):
         return self.jou_list;
-
 
     def num2tuple(self, num):
         list_num = num.split('_')
@@ -412,63 +717,78 @@ class Jou_xml(object):
         return tup
 
 if __name__ == '__main__':
-#     folder = '.'
+#     folder = '.\\org'
+    folder = '.\\data'
+    config.folder_name = folder
 
-#     jou_xml = Jou_xml('法人税法.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '法人税', 0, jou_jou)
-#     appdx_list = jou_xml.create_appdxTable()
-#     for (title, text) in appdx_list:
-#         file_name = '法人税法' + title + '.md'
-#         file_name = os.path.join(folder, file_name)
-#         with open(file_name,
-#             mode='w',
-#             encoding='UTF-8') as f:
-#             f.write(text)
-#     jou_xml = Jou_xml('法人税法施行令.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '法人税', 1, jou_jou)
+#     mei = '国税通則' # 済み__version__ = '0.5.2'
+#     mei = '国税徴収' # 済み__version__ = '0.5.0'
+#     mei = '所得税' # 済み__version__ = '0.5.0'
+#     mei = '法人税' # 済み__version__ = '0.5.0'
+#     mei = '相続税' # 済み__version__ = '0.5.0'
+#     mei = '消費税' # 済み__version__ = '0.5.1'
+#     mei = '地方税' # 済み__version__ = '0.5.0'
+#     mei = '地方法人税' # 済み__version__ = '0.5.0'
+    mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
+#     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
+#     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
+#     mei = '会社' # 済み__version__ = '0.5.0'
+#     mei = '一般社団法人' # 済み__version__ = '0.5.1'
 
-#     jou_xml = Jou_xml('法人税法施行規則.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '法人税', 2, jou_jou)
-
-    folder = '.'
-
-    jou_xml = Jou_xml('消費税法.xml')
+    jou_xml = Jou_xml(mei + '法.xml')
     jou_list = jou_xml.get_jou_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
-                '消費税', 0, jou_jou)
+                mei, 0, jou_jou)
     appdx_list = jou_xml.create_appdxTable()
     for (title, text) in appdx_list:
-        file_name = '消費税法' + title + '.md'
+        file_name = mei + '法＿＿＿＿' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
+    jou_xml = Jou_xml(mei + '法施行令.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                mei, 1, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = mei + '法施行＿令' + title + '.md'
+        file_name = os.path.join(folder, file_name)
+        with open(file_name,
+            mode='w',
+            encoding='UTF-8') as f:
+            f.write(text)
+    jou_xml = Jou_xml(mei + '法施行規則.xml')
+    jou_list = jou_xml.get_jou_list()
+    for jou_jou in jou_list:
+        save_file( \
+                folder, \
+                mei, 2, jou_jou)
+    appdx_list = jou_xml.create_appdxTable()
+    for (title, text) in appdx_list:
+        file_name = mei + '法施行規則' + title + '.md'
         file_name = os.path.join(folder, file_name)
         with open(file_name,
             mode='w',
             encoding='UTF-8') as f:
             f.write(text)
 
-    jou_xml = Jou_xml('消費税法施行令.xml')
-    jou_list = jou_xml.get_jou_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                '消費税', 1, jou_jou)
+    from ToKachi import kakou1_ji, \
+            kakou1_hou_rei, kakou2_hou_rei, \
+            kakou1_hou_ki, kakou2_hou_ki, \
+            kakou1_rei_ki, kakou2_rei_ki
 
-    jou_xml = Jou_xml('消費税法施行規則.xml')
-    jou_list = jou_xml.get_jou_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                '消費税', 2, jou_jou)
+    kakou1_ji()
+    print("kakou1_ji end")
+    kakou1_hou_rei()
+    kakou2_hou_rei()
+    kakou1_hou_ki()
+    kakou2_hou_ki()
+    kakou1_rei_ki()
+    kakou2_rei_ki()
+

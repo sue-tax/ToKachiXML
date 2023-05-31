@@ -27,6 +27,14 @@ class Jou_koumoku(object):
         ("語句", "定義")もある
         '''
         self.koumoku_list = koumoku_list
+        self.soku = None
+        self.midashi = None
+
+    def set_soku(self, soku):
+        self.soku = soku
+
+    def set_midashi(self, midashi):
+        self.midashi = midashi
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)
@@ -76,10 +84,10 @@ class Jou_koumoku(object):
 #         d.dprint_method_start()
 #         d.dprint(self.honbun)
 #         d.dprint(self.koumoku_tuple)
-        list_honbun = ['{}　{}\n'.format(
+        list_honbun = ['{}　{}'.format(
                 self.koumoku_tuple[-1], self.honbun)]
         for koumoku in self.koumoku_list:
-            list_honbun.append('\n{}\n'. \
+            list_honbun.append('\n\n{}'. \
                     format(koumoku.get_honbun()))
         str_honbun = ''.join(list_honbun)
         del list_honbun
