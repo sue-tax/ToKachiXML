@@ -11,6 +11,8 @@ import e
 
 import config
 
+from md import Md
+
 from jou_jou import Jou_jou
 from jou_kou import Jou_kou
 from jou_gou import Jou_gou
@@ -25,23 +27,36 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.5.2'
+__version__ = '0.6.0'
 
 
 class Jou_xml(object):
 
-    def __init__(self, file):
+    def __init__(self, file, mei, kubun):
+        '''
+        file 消費税法.xml
+        mei 消費税
+        kubun 0,1,2
+        '''
         tree = etree.parse(file)
-        root = tree.getroot()
+#         root = tree.getroot()
         jou_list = []
         # 本則
         articles = tree.xpath('//MainProvision//Article')
         self.proc_article("＿",  # "本則",
                  jou_list, articles)
+        index_list = [ '[TOC]\n\n# 本則\n\n' ]
+        main_provision = tree.xpath('//MainProvision')
+        self.proc_index(main_provision[0],
+                "＿", index_list, mei, kubun)
+        d.dprint(index_list)
         # 附則
         fusokus = tree.xpath('//SupplProvision')
+        if len(fusokus) != 0:
+            index_list.append('# 附則\n\n')
         for fusoku in fusokus:
-            fusoku_name = fusoku.attrib.get("AmendLawNum")
+            fusoku_name = fusoku.attrib.get( \
+                    "AmendLawNum")
             if fusoku_name == None:
                 str_fusoku = "附則"
             else:
@@ -52,41 +67,275 @@ class Jou_xml(object):
                 str_ara = TransNum.k2a(
                         str_hizuke, True)
                 str_fusoku = "附則" + str_ara
+            index_list.append(
+                    '## ' + str_fusoku + '\n\n')
             articles = fusoku.xpath(".//Article")
             if len(articles) != 0:
                 self.proc_article(str_fusoku,
                         jou_list, articles)
+                self.proc_index_article(articles,
+                        str_fusoku, index_list,
+                        mei, kubun)
             else:
                 # 附則の中には、第Ｘ条がなく、
                 # 項のみの場合あり
                 self.proc_jou_nashi(str_fusoku,
-                        jou_list, fusoku)
+                        jou_list, fusoku,
+                        index_list, mei, kubun)
         self.tree = tree
         self.jou_list = jou_list
+        self.index_list = index_list
 
-    def proc_jou_nashi(self, soku, jou_list, fusoku):
+    def proc_index(self, provision, soku,
+            index_list, mei, kubun):
+        '''
+        provision 本則、附則の先頭ノード
+        soku 本則、附則名
+        index_list 目次用のmdファイルの作成用
+        mei 法律名　消費税 など
+        kubun 0 法、1 施行令、2 施行規則
+        '''
+        childs = provision.xpath('*')
+        if len(childs) != 0:
+            if childs[0].tag == "Part":
+                self.proc_index_part(childs, soku,
+                        index_list, mei, kubun)
+            elif childs[0].tag == "Chapter":
+                self.proc_index_chapter(childs, soku,
+                        index_list, mei, kubun)
+            elif childs[0].tag == "Section":
+                self.proc_index_section(childs, soku,
+                        index_list, mei, kubun)
+            elif childs[0].tag == "Subsection":
+                self.proc_index_subsection(childs, soku,
+                        index_list, mei, kubun)
+            elif childs[0].tag == "Division":
+                self.proc_index_division(childs, soku,
+                        index_list, mei, kubun)
+            elif childs[0].tag == "Article":
+                self.proc_index_article(childs, soku,
+                        index_list, mei, kubun)
+            else:
+                print(childs[0].tag)
+                assert(False)
+        else:
+            print(provision.text)
+            print(provision)
+            assert(False)
+
+    def proc_index_part(self, parts, soku,
+            index_list, mei, kubun):
+        for part in parts:
+            titles = part.xpath('PartTitle')
+            index_list.append(
+                    "## " + titles[0].text + '\n\n')
+            childs = part.xpath('./*')
+            if len(childs) > 1:
+                if childs[1].tag == "Chapter":
+                    self.proc_index_chapter(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Section":
+                    self.proc_index_section(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Subsection":
+                    self.proc_index_subsection(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Division":
+                    self.proc_index_division(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Article":
+                    self.proc_index_article(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                else:
+                    print(childs[0].tag)
+                    assert(False)
+            else:
+                print(part.tag)
+                print(part)
+                assert(False)
+
+    def proc_index_chapter(self, chapters, soku,
+            index_list, mei, kubun):
+        for chapter in chapters:
+            titles = chapter.xpath('ChapterTitle')
+            index_list.append(
+                    "### " + titles[0].text + '\n\n')
+            childs = chapter.xpath('./*')
+            if len(childs) > 1:
+                if childs[1].tag == "Section":
+                    self.proc_index_section(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Subsection":
+                    self.proc_index_subsection(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Division":
+                    self.proc_index_division(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Article":
+                    self.proc_index_article(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                else:
+                    print(childs[1].tag)
+                    assert(False)
+            else:
+                print(chapter.text)
+                print(chapter)
+                assert(False)
+
+    def proc_index_section(self, sections, soku,
+            index_list, mei, kubun):
+        for section in sections:
+            titles = section.xpath('SectionTitle')
+            index_list.append(
+                    "#### " + titles[0].text + '\n\n')
+            childs = section.xpath('./*')
+            if len(childs) > 1:
+                if childs[1].tag == "Subsection":
+                    self.proc_index_subsection(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Division":
+                    self.proc_index_division(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Article":
+                    self.proc_index_article(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                else:
+                    print(childs[1].tag)
+                    assert(False)
+            else:
+                print(section.text)
+                print(section)
+                assert(False)
+
+    def proc_index_subsection(self, subsections, soku,
+            index_list, mei, kubun):
+        for subsection in subsections:
+            titles = subsection.xpath('SubsectionTitle')
+            index_list.append(
+                    "##### " + titles[0].text + '\n\n')
+            childs = subsection.xpath('./*')
+            if len(childs) > 1:
+                if childs[1].tag == "Division":
+                    self.proc_index_division(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                elif childs[1].tag == "Article":
+                    self.proc_index_article(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                else:
+                    print(childs[1].tag)
+                    assert(False)
+            else:
+                print(subsection.text)
+                print(subsection)
+                assert(False)
+
+    def proc_index_division(self, divisions, soku,
+            index_list, mei, kubun):
+        for division in divisions:
+            titles = division.xpath('DivisionTitle')
+            index_list.append(
+                    "###### " + titles[0].text + '\n\n')
+            childs = division.xpath('./*')
+            if len(childs) > 1:
+                if childs[1].tag == "Article":
+                    self.proc_index_article(childs[1:],
+                            soku,
+                            index_list, mei, kubun)
+                else:
+                    print(childs[1].tag)
+                    assert(False)
+            else:
+                print(division.text)
+                print(division)
+                assert(False)
+
+    def proc_index_article(self, articles, str_fusoku,
+            index_list, mei, kubun):
+        for article in articles:
+            num = article.get('Num')
+            if ':' in num:
+                # '29:30' 削除のパターン
+                continue
+            jou_bangou_tuple = self.num2tuple(num)
+            d.dprint(jou_bangou_tuple)
+            # 見出し
+            title = article.xpath("ArticleCaption")
+            if len(title) != 0:
+                midashi = title[0].text
+            else:
+                midashi = ""
+            jou_str = TransNum.bangou_tuple2str(
+                    (jou_bangou_tuple, None, None))
+            d.dprint(jou_str)
+            str_text = '[' + jou_str[0] + midashi + ']('
+            d.dprint(str_text)
+            index_list.append(str_text)
+            (file_name, _str_title, _kubun_mei, _jou_list) = \
+                    Md.sakusei_title('',
+                    mei, kubun,
+                    str_fusoku,
+                    (jou_bangou_tuple, None, None),
+                    '', '')
+            index_list.append(file_name[:-3] \
+                    + '_.md)\n\n')
+            d.dprint(index_list)
+
+
+    def proc_jou_nashi(self, str_fusoku,
+            jou_list, fusoku, index_list, mei, kubun):
         '''
         条（article）がないfusokuで示される附則を
         仮の条として、各項を処理して
         jou_listに条文データを設定する。
-        sokuは、附則名を示す。
+        str_fusokuは、附則名を示す。
         '''
+#         index_list.append('##' + str_fusoku + '\n\n')
         paragraphs = fusoku.xpath('Paragraph')
-        kou = self.create_kou(soku, midashi=None,
+        kou = self.create_kou(str_fusoku, midashi=None,
                 jou_bangou_tuple=(0,),
                 paragraph=paragraphs[0])
         jou = Jou_jou(bangou_tuple=(0,), kou=kou)
         for paragraph in paragraphs[1:]:
-            kou = self.create_kou(soku,
+            kou = self.create_kou(str_fusoku,
                     midashi=None,
                     jou_bangou_tuple=(0,),
                     paragraph=paragraph)
             jou.tsuika_kou(kou)
         jou.set_kubun((None, None,
                 None, None, None))
-        jou.set_soku(soku)
+        jou.set_soku(str_fusoku)
 #         jou.set_midashi(midashi)
         jou_list.append(jou)
+        jou_str = TransNum.bangou_tuple2str(
+                ((0,),None,None))
+        midashi = jou.get_midashi()
+        if midashi != None:
+            index_list.append(
+                    '[' + jou_str[0] + midashi + '](')
+        else:
+            index_list.append(
+                    '[' + jou_str[0] + '](')
+        (file_name, _str_title, _kubun_mei, _jou_list) = \
+                Md.sakusei_title('',
+                mei, kubun,
+                str_fusoku,
+                ((0,),None,None), '', '')
+        index_list.append(file_name + ')\n\n')
+        d.dprint(index_list)
 
 
     def proc_article(self, soku, jou_list, articles):
@@ -278,23 +527,6 @@ class Jou_xml(object):
                 else:
                     if child_node.text != None:
                         honbun_list.append(child_node.text)
-            # Rubyしか、取れない
-#             child_nodes = sentence.xpath('./*')
-#             d.dprint(child_nodes)
-#             for child_node in child_nodes:
-#                 d.dprint(child_node)
-#                 if child_node.text != None:
-#                     honbun_list.append(child_node.text)
-
-#            Ruby（拳）が取れない
-#             text_nodes = sentence.xpath('text()')
-#             d.dprint(text_nodes)
-#             for text_node in text_nodes:
-#                 d.dprint(text_node)
-#                 honbun_list.append(text_node)
-
-#             if sentence.text != None:
-#                 honbun_list.append(sentence.text)
         # 項目列記
         columns = item.xpath(
                 './ItemSentence/Column')
@@ -348,9 +580,6 @@ class Jou_xml(object):
         sentences = subitem1.xpath(
                 './Subitem1Sentence/Sentence')
         honbun_list = []
-#         for sentence in sentences:
-#             if sentence.text != None:
-#                 honbun_list.append(sentence.text)
         for sentence in sentences:
             # Rubyに対応
             child_nodes = sentence.xpath('./node()')
@@ -400,11 +629,6 @@ class Jou_xml(object):
 
         sentences = subitem2.xpath(
                 './Subitem2Sentence/Sentence')
-        # TODO honbun_list
-#         honbun = ''
-#         for sentence in sentences:
-#             if sentence.text != None:
-#                 honbun = honbun + sentence.text
         honbun_list = []
         for sentence in sentences:
             # Rubyに対応
@@ -421,11 +645,9 @@ class Jou_xml(object):
         for column in columns:
             sentences = column.xpath('./Sentence')
             for sentence in sentences:
-#                 honbun = honbun + sentence.text
                 honbun_list.append(sentence.text)
         tables = subitem2.xpath('.//Table')
         table_text = self.create_table(tables)
-#         honbun = honbun + table_text
         honbun_list.append(table_text)
         honbun = ''.join(honbun_list)
         del honbun_list
@@ -459,10 +681,6 @@ class Jou_xml(object):
 
         sentences = subitem3.xpath(
                 './Subitem3Sentence/Sentence')
-#         honbun = ''
-#         for sentence in sentences:
-#             if sentence.text != None:
-#                 honbun = honbun + sentence.text
         honbun_list = []
         for sentence in sentences:
             # Rubyに対応
@@ -478,11 +696,9 @@ class Jou_xml(object):
         for column in columns:
             sentences = column.xpath('./Sentence')
             for sentence in sentences:
-#                 honbun = honbun + sentence.text
                 honbun_list.append(sentence.text)
         tables = subitem3.xpath('.//Table')
         table_text = self.create_table(tables)
-#         honbun = honbun + table_text
         honbun_list.append(table_text)
         honbun = ''.join(honbun_list)
         del honbun_list
@@ -512,20 +728,6 @@ class Jou_xml(object):
             tableRows = table.xpath('TableRow')
             topRow = tableRows[0]
             topColumns = topRow.xpath('TableColumn')
-            # 最初の１行だけ表示が異なるので
-            # 意図的に追加した
-            # 要検討
-#             if len(topColumns) == 2:
-#                 text_list.append('\n\n| 上段 | 下段 |\n' \
-#                         + '| ---- | ---- |\n')
-#             elif len(topColumns) == 3:
-#                 text_list.append(
-#                     '\n\n| 上段 | 中段 | 下段 |\n' \
-#                     + '| ---- | ---- | ---- |\n')
-#             else:
-#                 text_list.append(
-#                     '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-#                     + '| ---- | ---- | ---- | ---- |\n')
             tableRow = tableRows[0]
             tableColumns = tableRow.xpath(
                     'TableColumn')
@@ -568,7 +770,8 @@ class Jou_xml(object):
         text = ''.join(text_list)
         return text
 
-    def create_appdxTable(self):
+    def create_appdxTable(self,
+            index_list, mei, kubun):
         # 別表はmdファイルを作るだけ
 
         # TODO 所得税法別表３，５などが対応できない
@@ -576,13 +779,26 @@ class Jou_xml(object):
 
         appdxTables = self.tree.xpath('//AppdxTable')
         appdx_list = []
+        if len(appdxTables) != 0:
+            index_list.append('# 別表\n\n')
         for appdxTable in appdxTables:
             appd_titles = appdxTable.xpath(
                     "./AppdxTableTitle")
             str_title = TransNum.k2a(
                     appd_titles[0].text, True)
             text_list = [str_title, '\n']
-
+            if kubun == 0:
+                file_name = mei + '法＿＿＿＿' \
+                        + str_title + '.md'
+            elif kubun == 1:
+                file_name = mei + '法施行＿令' \
+                        + str_title + '.md'
+            else:
+                file_name = mei + '法施行規則' \
+                        + str_title + '.md'
+            str_index = '[' + appd_titles[0].text \
+                    + '](' + file_name + ')\n\n'
+            index_list.append(str_index)
             # TODO 順番を考慮する必要あり
             table_structs = appdxTable.xpath(
                     './TableStruct')
@@ -592,21 +808,6 @@ class Jou_xml(object):
                         './Table')
                 for table in tables:
                     tableRows = table.xpath('TableRow')
-#                     topRow = tableRows[0]
-#                     topColumns = topRow.xpath(
-#                             'TableColumn')
-#                     if len(topColumns) == 2:
-#                         table_list = [
-#                                 '\n\n| 上段 | 下段 |\n' \
-#                                 + '| ---- | ---- |\n' ]
-#                     elif len(topColumns) == 3:
-#                         table_list = [
-#                             '\n\n| 上段 | 中段 | 下段 |\n' \
-#                             + '| ---- | ---- | ---- |\n' ]
-#                     else:
-#                         table_list = [
-#                             '\n\n| 上段 | 　　 | 　　 | 下段 |\n' \
-#                             + '| ---- | ---- | ---- | ---- |\n' ]
                     table_list = []
                     tableRow = tableRows[0]
                     tableColumns = tableRow.xpath(
@@ -697,7 +898,10 @@ class Jou_xml(object):
 
 
     def get_jou_list(self):
-        return self.jou_list;
+        return self.jou_list
+
+    def get_index_list(self):
+        return self.index_list
 
     def num2tuple(self, num):
         list_num = num.split('_')
@@ -717,31 +921,43 @@ class Jou_xml(object):
         return tup
 
 if __name__ == '__main__':
-#     folder = '.\\org'
-    folder = '.\\data'
+    folder = '.\\org'
+#     folder = '.\\data'
     config.folder_name = folder
 
 #     mei = '国税通則' # 済み__version__ = '0.5.2'
-#     mei = '国税徴収' # 済み__version__ = '0.5.0'
+    mei = '国税徴収' # 済み__version__ = '0.6.0'
 #     mei = '所得税' # 済み__version__ = '0.5.0'
 #     mei = '法人税' # 済み__version__ = '0.5.0'
 #     mei = '相続税' # 済み__version__ = '0.5.0'
 #     mei = '消費税' # 済み__version__ = '0.5.1'
 #     mei = '地方税' # 済み__version__ = '0.5.0'
 #     mei = '地方法人税' # 済み__version__ = '0.5.0'
-    mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
+#     mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
 #     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
 #     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
 #     mei = '会社' # 済み__version__ = '0.5.0'
 #     mei = '一般社団法人' # 済み__version__ = '0.5.1'
+#     mei = '民' # 済み__version__ = '0.5.2'
 
-    jou_xml = Jou_xml(mei + '法.xml')
+#     jou_xml = Jou_xml('会社計算規則.xml')
+#     jou_list = jou_xml.get_jou_list()
+#     for jou_jou in jou_list:
+#         save_file( \
+#                 folder, \
+#                 '会社計算規則', 0, jou_jou)
+#     from ToKachi import kakou1_ji
+#     kakou1_ji()
+
+    jou_xml = Jou_xml(mei + '法.xml', mei, 0)
     jou_list = jou_xml.get_jou_list()
+    index_list = jou_xml.get_index_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
                 mei, 0, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
+    appdx_list = jou_xml.create_appdxTable(
+            index_list, mei, 0)
     for (title, text) in appdx_list:
         file_name = mei + '法＿＿＿＿' + title + '.md'
         file_name = os.path.join(folder, file_name)
@@ -749,13 +965,23 @@ if __name__ == '__main__':
             mode='w',
             encoding='UTF-8') as f:
             f.write(text)
-    jou_xml = Jou_xml(mei + '法施行令.xml')
+    str_index = ''.join(index_list)
+    file_name = 'index' + mei + '法＿＿＿＿.md'
+    file_name = os.path.join(folder, file_name)
+    with open(file_name,
+        mode='w',
+        encoding='UTF-8') as f:
+        f.write(str_index)
+
+    jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
     jou_list = jou_xml.get_jou_list()
+    index_list = jou_xml.get_index_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
                 mei, 1, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
+    appdx_list = jou_xml.create_appdxTable(
+            index_list, mei, 0)
     for (title, text) in appdx_list:
         file_name = mei + '法施行＿令' + title + '.md'
         file_name = os.path.join(folder, file_name)
@@ -763,13 +989,23 @@ if __name__ == '__main__':
             mode='w',
             encoding='UTF-8') as f:
             f.write(text)
-    jou_xml = Jou_xml(mei + '法施行規則.xml')
+    str_index = ''.join(index_list)
+    file_name = 'index' + mei + '法施行＿令.md'
+    file_name = os.path.join(folder, file_name)
+    with open(file_name,
+        mode='w',
+        encoding='UTF-8') as f:
+        f.write(str_index)
+
+    jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
     jou_list = jou_xml.get_jou_list()
+    index_list = jou_xml.get_index_list()
     for jou_jou in jou_list:
         save_file( \
                 folder, \
                 mei, 2, jou_jou)
-    appdx_list = jou_xml.create_appdxTable()
+    appdx_list = jou_xml.create_appdxTable(
+            index_list, mei, 0)
     for (title, text) in appdx_list:
         file_name = mei + '法施行規則' + title + '.md'
         file_name = os.path.join(folder, file_name)
@@ -777,6 +1013,13 @@ if __name__ == '__main__':
             mode='w',
             encoding='UTF-8') as f:
             f.write(text)
+    str_index = ''.join(index_list)
+    file_name = 'index' + mei + '法施行規則.md'
+    file_name = os.path.join(folder, file_name)
+    with open(file_name,
+        mode='w',
+        encoding='UTF-8') as f:
+        f.write(str_index)
 
     from ToKachi import kakou1_ji, \
             kakou1_hou_rei, kakou2_hou_rei, \
@@ -784,7 +1027,6 @@ if __name__ == '__main__':
             kakou1_rei_ki, kakou2_rei_ki
 
     kakou1_ji()
-    print("kakou1_ji end")
     kakou1_hou_rei()
     kakou2_hou_rei()
     kakou1_hou_ki()

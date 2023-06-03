@@ -357,7 +357,8 @@ class Md(object):
         str_title = ''.join(list_bun)
         del list_bun
 #         d.dprint_method_end()
-        return (file_name, str_title, kubun_mei, jou_list)
+        return (file_name, str_title,
+                kubun_mei, jou_list)
 
     @classmethod
     def sakusei_tag(cls, zeihou_mei, kubun_mei,
