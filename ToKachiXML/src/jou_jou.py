@@ -8,6 +8,7 @@ import c
 import d
 
 from TransNum import TransNum
+from pickle import NONE
 
 
 class Jou_jou(object):
@@ -77,6 +78,8 @@ class Jou_jou(object):
         self.kubun = None
         self.soku = None
         self.midashi = None
+        self.zenjou = None
+        self.jijou = None
 
     def set_kubun(self, kubun):
         d.dprint(kubun)
@@ -101,6 +104,21 @@ class Jou_jou(object):
 
     def get_midashi(self):
         return self.midashi
+
+    def set_zenjou(self, zen_jou):
+        self.zenjou = zen_jou
+
+    def set_jijou(self, ji_jou):
+        self.jijou = ji_jou
+
+    def get_zenjou(self):
+        return self.zenjou
+
+    def get_jijou(self):
+        return self.jijou
+
+    def get_kou_list(self):
+        return self.kou_list
 
     def get_bangou_tuple(self):
         return self.bangou_tuple

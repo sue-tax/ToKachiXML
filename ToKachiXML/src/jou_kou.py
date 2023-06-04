@@ -35,6 +35,29 @@ class Jou_kou(object):
                     int(TransNum.k2a(jou_bangou_tuple[1])),
                     int(TransNum.k2a(jou_bangou_tuple[2])),
                     int(TransNum.k2a(jou_bangou_tuple[3])))
+#        当初の想定と違うかも
+#         elif len(jou_bangou_tuple) == 1:
+#             self.jou_bangou_tuple = \
+#                     ((int(TransNum.k2a(jou_bangou_tuple[0])),),
+#                     kou_bangou, None)
+#         elif len(jou_bangou_tuple) == 2:
+#             self.jou_bangou_tuple = \
+#                     ((int(TransNum.k2a(jou_bangou_tuple[0])),
+#                     int(TransNum.k2a(jou_bangou_tuple[1]))),
+#                     kou_bangou, None)
+#         elif len(jou_bangou_tuple) == 3:
+#             self.jou_bangou_tuple = \
+#                     ((int(TransNum.k2a(jou_bangou_tuple[0])),
+#                     int(TransNum.k2a(jou_bangou_tuple[1])),
+#                     int(TransNum.k2a(jou_bangou_tuple[2]))),
+#                     kou_bangou, None)
+#         elif len(jou_bangou_tuple) == 4:
+#             self.jou_bangou_tuple = \
+#                     ((int(TransNum.k2a(jou_bangou_tuple[0])),
+#                     int(TransNum.k2a(jou_bangou_tuple[1])),
+#                     int(TransNum.k2a(jou_bangou_tuple[2])),
+#                     int(TransNum.k2a(jou_bangou_tuple[3]))),
+#                     kou_bangou, None)
         else:
             assert(False, "条文番号の「の」が４以上は無理")
         self.kou_bangou = kou_bangou
@@ -62,11 +85,15 @@ class Jou_kou(object):
     def get_kou_bangou(self):
         return self.kou_bangou
 
-    def set_jou_bangou_tuple(self, jou_bangou_tuple):
-#         d.dprint(jou_bangou_tuple)
-        self.jou_bangou_tuple = jou_bangou_tuple
-        for gou in self.gou_list:
-            gou.set_jou_bangou_tuple(jou_bangou_tuple)
+#     def set_jou_bangou_tuple(self, jou_bangou_tuple):
+# #         d.dprint(jou_bangou_tuple)
+#         self.jou_bangou_tuple = jou_bangou_tuple
+#         for gou in self.gou_list:
+#             gou.set_jou_bangou_tuple(jou_bangou_tuple)
+#     def set_jou_bangou_tuple(self, jou_bangou_tuple):
+# #         d.dprint(jou_bangou_tuple)
+#         self.jou_bangou_tuple = \
+#                 (jou_bangou_tuple, self.kou_bangou, None)
 
     def get_gou_list(self):
         return self.gou_list
