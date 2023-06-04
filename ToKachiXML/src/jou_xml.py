@@ -27,7 +27,7 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 
 class Jou_xml(object):
@@ -447,6 +447,26 @@ class Jou_xml(object):
                     division_str))
             jou.set_soku(soku)
             jou.set_midashi(midashi)
+            zenjou = article.xpath(
+                    'preceding::Article[position()=last()]')
+            if len(zenjou) == 1:
+                zenjou_num = zenjou[0].get('Num')
+                if not ':' in zenjou_num:
+                    zenjou_bangou_tuple \
+                            = self.num2tuple(zenjou_num)
+                    jou.set_zenjou(zenjou_bangou_tuple)
+            jijou = article.xpath(
+                    'preceding::Article[position()=1]')
+            if len(jijou) == 1:
+                jijou_num = jijou[0].get('Num')
+                if not ':' in jijou_num:
+                    jijou_bangou_tuple \
+                            = self.num2tuple(jijou_num)
+                    jou.set_jijou(jijou_bangou_tuple)
+#             d.dprint("========")
+#             d.dprint(jou_bangou_tuple)
+#             d.dprint(zenjou)
+#             d.dprint("========")
             jou_list.append(jou)
 
     def create_kou(self, soku, midashi,
@@ -926,16 +946,16 @@ if __name__ == '__main__':
     config.folder_name = folder
 
 #     mei = '国税通則' # 済み__version__ = '0.5.2'
-    mei = '国税徴収' # 済み__version__ = '0.6.0'
+#     mei = '国税徴収' # 済み__version__ = '0.6.0'
 #     mei = '所得税' # 済み__version__ = '0.5.0'
 #     mei = '法人税' # 済み__version__ = '0.5.0'
-#     mei = '相続税' # 済み__version__ = '0.5.0'
+#     mei = '相続税' # 済み__version__ = '0.6.1'
 #     mei = '消費税' # 済み__version__ = '0.5.1'
 #     mei = '地方税' # 済み__version__ = '0.5.0'
 #     mei = '地方法人税' # 済み__version__ = '0.5.0'
 #     mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
 #     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
-#     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
+    mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
 #     mei = '会社' # 済み__version__ = '0.5.0'
 #     mei = '一般社団法人' # 済み__version__ = '0.5.1'
 #     mei = '民' # 済み__version__ = '0.5.2'
@@ -956,6 +976,9 @@ if __name__ == '__main__':
         save_file( \
                 folder, \
                 mei, 0, jou_jou)
+
+#     exit()
+
     appdx_list = jou_xml.create_appdxTable(
             index_list, mei, 0)
     for (title, text) in appdx_list:

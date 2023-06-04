@@ -200,9 +200,6 @@ class Md(object):
                 jou_jou.bangou_tuple,
                 jou_jou.midashi, '_')
         list_bun = [str_title]
-#         list_bun.append('\n\n')
-#         list_bun.append(self.honbun)
-#         list_bun.append('\n')
         for kou in jou_jou.kou_list:
             list_bun.append('\n\n')
             title = kou.get_item_title()
@@ -212,7 +209,6 @@ class Md(object):
                 list_bun.append('１')
             list_bun.append('　')
             honbun = kou.honbun
-#             honbun = kou.get_honbun()
             list_bun.append(honbun)
             gou_list = kou.get_gou_list()
             for gou in gou_list:
@@ -229,6 +225,48 @@ class Md(object):
                 jou_jou.midashi,
                 jou_list)
         del jou_list
+
+        zenjou = jou_jou.get_zenjou()
+#         d.dprint(zenjou)
+        if zenjou != None:
+            zenjou_name = \
+                    cls.sakusei_file_name(
+                    zeihou_mei, kubun, jou_jou.soku,
+                    (zenjou, None, None),
+                    jou_jou.midashi, '_')
+#             d.dprint(zenjou_name)
+            list_bun.append('[前条←](' \
+                    + zenjou_name + ')  ')
+        jijou = jou_jou.get_jijou()
+#         d.dprint(jijou)
+        if jijou != None:
+            jijou_name = \
+                    cls.sakusei_file_name(
+                    zeihou_mei, kubun, jou_jou.soku,
+                    (jijou, None, None),
+                    jou_jou.midashi, '_')
+#             d.dprint(jijou_name)
+            list_bun.append('  [→次条](' \
+                    + jijou_name + ')')
+        list_bun.append('\n\n')
+
+        kou_list = jou_jou.get_kou_list()
+        for kou in kou_list:
+            kou_bangou_tuple = \
+                    kou.get_jou_bangou_tuple()
+            d.dprint(kou_bangou_tuple)
+            kou_name = kou.get_kou_bangou()
+            d.dprint(kou_name)
+            kou_file_name = \
+                    cls.sakusei_file_name(
+                    zeihou_mei, kubun, jou_jou.soku,
+                    (kou_bangou_tuple, kou_name, None),
+                    jou_jou.midashi, '_')
+            kou_zenkaku = TransNum.i2z(kou_name)
+            list_bun.append('[第' + kou_zenkaku + '項](' \
+                    + kou_file_name + ')  ')
+        list_bun.append('\n\n')
+
         list_bun.append(str_tag)
 #         d.dprint(list_bun)
         file_bun = ''.join(list_bun)
@@ -361,19 +399,57 @@ class Md(object):
                 kubun_mei, jou_list)
 
     @classmethod
+    def sakusei_file_name(cls,
+            zeihou_mei, kubun, soku, joubun_bangou,
+            midashi, full=''):
+        '''
+        ファイル名を作成する
+        '''
+#         d.dprint_method_start()
+#         d.dprint(kubun)
+#         d.dprint(soku)
+#         d.dprint(joubun_bangou)
+        if kubun == cls.kubunHou:
+            kubun_mei = '法'
+            kubun_file_mei = '法＿＿＿＿'
+        elif kubun == cls.kubunRei:
+            kubun_mei = '法施行令'
+            kubun_file_mei = '法施行＿令'
+        else:
+            assert(kubun == cls.kubunKi)
+            kubun_mei = '法施行規則'
+            kubun_file_mei = '法施行規則'
+        # list_name はファイル名の生成用
+        list_name = [zeihou_mei, kubun_file_mei]
+        if (soku == None) or \
+                (soku == "本則") or (soku == "＿"):
+            list_name.append("＿")
+        else:
+            list_name.append(soku)
+        jou_list = TransNum.bangou_tuple2str(
+                joubun_bangou)
+        list_name.extend(jou_list)
+        list_name.append(full)
+        list_name.append('.md')
+        file_name = ''.join(list_name)
+#         d.dprint_method_end()
+        return file_name
+
+
+    @classmethod
     def sakusei_tag(cls, zeihou_mei, kubun_mei,
             soku, part, midashi, jou_list):
         # obsidianでの利用を想定したタグの設定
         list_tag = ['#', zeihou_mei, kubun_mei]
         list_bun = list_tag.copy()
-        list_bun.append('\n')
+        list_bun.append('\n\n')
 
         if (soku != None) and \
                     (soku != '本則') and (soku != '＿'):
             list_tag.append("/")
             list_tag.append(soku)
             list_bun.extend(list_tag)
-            list_bun.append('\n')
+            list_bun.append('\n\n')
 
         if part != None:
             # #相続税法/_第１章総則/_第１節通則
@@ -385,35 +461,35 @@ class Md(object):
                 list_tag_kubun.append('_')
                 list_tag_kubun.append(part[0])
                 list_bun.extend(list_tag_kubun)
-                list_bun.append('\n')
+                list_bun.append('\n\n')
                 list_tag_kubun.append('/')
             if part[1] != None:
                 # 表示の順番を考慮して
                 list_tag_kubun.append('_')
                 list_tag_kubun.append(part[1])
                 list_bun.extend(list_tag_kubun)
-                list_bun.append('\n')
+                list_bun.append('\n\n')
                 list_tag_kubun.append('/')
             if part[2] != None:
                 # 表示の順番を考慮して
                 list_tag_kubun.append('_')
                 list_tag_kubun.append(part[2])
                 list_bun.extend(list_tag_kubun)
-                list_bun.append('\n')
+                list_bun.append('\n\n')
                 list_tag_kubun.append('/')
             if part[3] != None:
                 # 表示の順番を考慮して
                 list_tag_kubun.append('_')
                 list_tag_kubun.append(part[3])
                 list_bun.extend(list_tag_kubun)
-                list_bun.append('\n')
+                list_bun.append('\n\n')
                 list_tag_kubun.append('/')
             if part[4] != None:
                 # 表示の順番を考慮して
                 list_tag_kubun.append('_')
                 list_tag_kubun.append(part[4])
                 list_bun.extend(list_tag_kubun)
-                list_bun.append('\n')
+                list_bun.append('\n\n')
                 list_tag_kubun.append('/')
         else:
             list_tag_kubun = list_tag.copy()
@@ -425,7 +501,7 @@ class Md(object):
             list_tag_kubun.append(midashi)
         list_bun.extend(list_tag_kubun)
         del list_tag_kubun
-        list_bun.append('\n')
+        list_bun.append('\n\n')
 
         # #消費税法/第Ｘ条（見出し）
         list_tag.append('/')
@@ -433,19 +509,19 @@ class Md(object):
         if midashi != None:
             list_tag.append(midashi)
         list_bun.extend(list_tag)
-        list_bun.append('\n')
+        list_bun.append('\n\n')
         # #消費税法/第Ｘ条（見出し）/第２項
         if jou_list[1] != '':
             list_tag.append('/')
             list_tag.append(jou_list[1])
             list_bun.extend(list_tag)
-            list_bun.append('\n')
+            list_bun.append('\n\n')
         # #消費税法/第Ｘ条（見出し）/第２項/第３号
         if jou_list[2] != '':
             list_tag.append('/')
             list_tag.append(jou_list[2])
             list_bun.extend(list_tag)
-            list_bun.append('\n')
+            list_bun.append('\n\n')
         del list_tag
         str_tag = ''.join(list_bun)
         del list_bun
