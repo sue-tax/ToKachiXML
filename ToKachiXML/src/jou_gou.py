@@ -53,6 +53,8 @@ class Jou_gou(object):
         self.soku = None
         self.midashi = None
         self.item_title = None
+        self.zengou = None
+        self.jigou = None
 
     def set_soku(self, soku):
         self.soku = soku
@@ -65,6 +67,21 @@ class Jou_gou(object):
 
     def tsuika_koumoku(self, koumoku):
         self.koumoku_list.append(koumoku)
+
+    def set_zengou(self, zengou):
+        self.zengou = zengou
+
+    def set_jigou(self, jigou):
+        self.jigou = jigou
+
+    def get_zengou(self):
+        return self.zengou
+
+    def get_jigou(self):
+        return self.jigou
+
+    def get_jou_bangou_tuple(self):
+        return self.jou_bangou_tuple
 
     def get_kou_bangou(self):
         return self.kou_bangou

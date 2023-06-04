@@ -35,27 +35,34 @@ class TransNum(object):
 
 
     @classmethod
-    def create_link_name(cls, zeihou_mei, kubun,
-                joubun_tuple):
+    def create_link_name(cls, zeihou_mei, kubun_mei,
+                joubun_tuple, soku=None):
         '''
         ハイパーリンク用の文字列を作成する。
+        soku : ＿ または 附則……
         '''
-        if kubun == "法":
+        if kubun_mei == "法":
             kubun_file_mei = '法＿＿＿＿'
-        elif kubun == '法施行令':
+        elif kubun_mei == '法施行令':
             kubun_file_mei = '法施行＿令'
-        else:
-            assert(kubun == '法施行規則')
+        elif kubun_mei == '法施行規則':
+            assert(kubun_mei == '法施行規則')
             kubun_file_mei = '法施行規則'
+        else:
+            kubun_file_mei = kubun_mei
         list_name = [zeihou_mei, kubun_file_mei]
+        if soku != None:
+            list_name.append(soku)
 
         jou_list = TransNum.bangou_tuple2str(
                 joubun_tuple)
         list_name.extend(jou_list)
         # jou_bangouが項か号の前提イロハは想定していない
         # 前提として項、号以下であり、条のことはない
+        # 条も想定することに変更
         assert(jou_list[0] != '')
-        assert(jou_list[1] != '')
+#         assert(jou_list[1] != '')
+#         print(list_name)
         link_name = ''.join(list_name)
         del list_name
         return link_name

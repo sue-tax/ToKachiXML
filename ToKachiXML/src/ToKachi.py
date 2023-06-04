@@ -42,7 +42,7 @@ from jou_yacc import jou_init, jou_parse
 from bun import Bun
 from md import Md
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 
 font_name = "MS ゴシック"
@@ -451,6 +451,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
         midashi = jou_jou.get_midashi()
 #         d.dprint(midashi)
         md_kou.set_midashi(midashi)
+        md_kou.set_kou(kou)
         md_kou.sakusei_file(folder)
         md_kou.save()
         list_log.append('\t\t{}\n'.format(
@@ -458,7 +459,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
 #         if len(kou.gou_list) != 0:
         (file_name, file_bun) = \
                 md_kou.sakusei_file_full_kou(
-                folder, kou.gou_list)
+                folder, kou, kou.gou_list)
 #         d.dprint(file_name)
 #         d.dprint(file_bun)
         with open(file_name,
@@ -478,6 +479,7 @@ def save_file(folder, zeihou_mei, kubun, jou_jou):
             md.set_part(jou_jou.kubun)
             md.set_soku(soku)
             md.set_midashi(midashi)
+            md.set_gou(gou)
             md.sakusei_file(folder)
             md.save()
             list_log.append('\t\t{}\n'.format(

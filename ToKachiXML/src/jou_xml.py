@@ -447,8 +447,13 @@ class Jou_xml(object):
                     division_str))
             jou.set_soku(soku)
             jou.set_midashi(midashi)
+            # 本則、附則を超えてしまう
+#             zenjou = article.xpath(
+#                     'preceding::Article[position()=last()]')
+            # 目などの範囲に限定されてしまう
             zenjou = article.xpath(
-                    'preceding::Article[position()=last()]')
+#                     'preceding-sibling::Article[position()=last()]')
+                    'preceding-sibling::Article[position()=1]')
             if len(zenjou) == 1:
                 zenjou_num = zenjou[0].get('Num')
                 if not ':' in zenjou_num:
@@ -456,7 +461,7 @@ class Jou_xml(object):
                             = self.num2tuple(zenjou_num)
                     jou.set_zenjou(zenjou_bangou_tuple)
             jijou = article.xpath(
-                    'preceding::Article[position()=1]')
+                    'following-sibling::Article[position()=1]')
             if len(jijou) == 1:
                 jijou_num = jijou[0].get('Num')
                 if not ':' in jijou_num:
@@ -517,6 +522,28 @@ class Jou_xml(object):
         kou.set_midashi(midashi)
         item_title = paragraph.xpath('./ParagraphNum')
         kou.set_item_title(item_title[0].text)
+        zenkou = paragraph.xpath( \
+                'preceding-sibling::' \
+                'Paragraph[position()=1]')
+        if len(zenkou) == 1:
+            zenkou_num = zenkou[0].get('Num')
+            if not ':' in zenkou_num:
+                zenkou_bangou \
+                        = int(zenkou_num)
+                kou.set_zenkou(
+                        (jou_bangou_tuple,
+                        zenkou_bangou, None))
+        jikou = paragraph.xpath( \
+                'following-sibling::' \
+                'Paragraph[position()=1]')
+        if len(jikou) == 1:
+            jikou_num = jikou[0].get('Num')
+            if not ':' in jikou_num:
+                jikou_bangou \
+                        = int(jikou_num)
+                kou.set_jikou(
+                        (jou_bangou_tuple,
+                        jikou_bangou, None))
 #         d.dprint_method_end()
         return kou
 
@@ -587,6 +614,34 @@ class Jou_xml(object):
         gou.set_midashi(midashi)
         item_title = item.xpath('./ItemTitle')
         gou.set_item_title(item_title[0].text)
+
+        zengou = item.xpath( \
+                'preceding-sibling::' \
+                'Item[position()=1]')
+        if len(zengou) == 1:
+            zengou_num = zengou[0].get('Num')
+            if not ':' in zengou_num:
+#                 print(gou_bangou_tuple)
+#                 print(zengou)
+                zengou_bangou_tuple \
+                        = self.num2tuple(zengou_num)
+#                 print(zengou_bangou_tuple)
+                gou.set_zengou(
+                        (jou_bangou_tuple,
+                        kou_bangou,
+                        zengou_bangou_tuple))
+        jigou = item.xpath( \
+                'following-sibling::' \
+                'Item[position()=1]')
+        if len(jigou) == 1:
+            jigou_num = jigou[0].get('Num')
+            if not ':' in jigou_num:
+                jigou_bangou_tuple \
+                        = self.num2tuple(jigou_num)
+                gou.set_jigou(
+                        (jou_bangou_tuple,
+                        kou_bangou,
+                        jigou_bangou_tuple))
 #         d.dprint_method_end()
         return gou
 
@@ -945,7 +1000,7 @@ if __name__ == '__main__':
 #     folder = '.\\data'
     config.folder_name = folder
 
-#     mei = '国税通則' # 済み__version__ = '0.5.2'
+    mei = '国税通則' # 済み__version__ = '0.5.2'
 #     mei = '国税徴収' # 済み__version__ = '0.6.0'
 #     mei = '所得税' # 済み__version__ = '0.5.0'
 #     mei = '法人税' # 済み__version__ = '0.5.0'
@@ -955,7 +1010,7 @@ if __name__ == '__main__':
 #     mei = '地方法人税' # 済み__version__ = '0.5.0'
 #     mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
 #     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
-    mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
+#     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
 #     mei = '会社' # 済み__version__ = '0.5.0'
 #     mei = '一般社団法人' # 済み__version__ = '0.5.1'
 #     mei = '民' # 済み__version__ = '0.5.2'
