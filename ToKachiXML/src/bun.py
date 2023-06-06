@@ -55,9 +55,16 @@ class Bun(object):
 #             ')' )
     # 読替規定の　「前項　などは無視
     # そうしないと、MemoryErrorが発生することあり
+#     matchZenkou = re.compile(
+#             r'(?<![一二三四五六七八九十百千条項])' \
+#             '(?<!\[)(?<!「)' \
+#             '((前条)|(前項)|(前号)' \
+#             '|(第([一二三四五六七八九十百千]+)項)' \
+#             '|(第([一二三四五六七八九十百千]+)号)' \
+#             ')' )
     matchZenkou = re.compile(
             r'(?<![一二三四五六七八九十百千条項])' \
-            '(?<!\[)(?<!「)' \
+            '(?<!\[|「|~)' \
             '((前条)|(前項)|(前号)' \
             '|(第([一二三四五六七八九十百千]+)項)' \
             '|(第([一二三四五六七八九十百千]+)号)' \
@@ -477,6 +484,9 @@ class Bun(object):
             m = Bun.matchZenkou.search(
                     self.kakou_bun, index)
             if m != None:
+                d.dprint(m.group(0))
+                d.dprint(self.kakou_bun)
+                d.dprint(index)
                 # 除外リストの確認
                 jogai_flag = False
                 for jogai in jogai_sort_list:
@@ -563,15 +573,21 @@ class Bun(object):
                 elif m.group(0)[-1] == '項':
                     # 第Ｘ項
                     han = TransNum.k2a(m.group(6))
+#                     han = TransNum.k2a(m.group(7))
                     ref_bangou = (self.joubun_bangou[0],
                             han, None)
                 elif m.group(0)[-1] == '号':
+                    d.dprint(m.group(8))
                     han = TransNum.k2a(m.group(8))
+#                     d.dprint(m.group(9))
+#                     han = TransNum.k2a(m.group(9))
                     ref_bangou = (self.joubun_bangou[0],
                             self.joubun_bangou[1],
                             (han,))
+                    d.dprint(ref_bangou)
                 else:
                     assert("error")
+                d.dprint("============")
                 jou_str = Bun.create_joubun_file_name(
                         self.zeihou_mei, self.kubun,
                         self.soku,

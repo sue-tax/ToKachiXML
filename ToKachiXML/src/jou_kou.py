@@ -5,6 +5,7 @@ joucutter joubun_kouより移植
 '''
 
 from TransNum import TransNum
+from pickle import NONE
 
 
 class Jou_kou(object):
@@ -66,6 +67,8 @@ class Jou_kou(object):
         self.soku = None
         self.midashi = None
         self.item_title = None
+        self.zenkou = None
+        self.jikou = None
 
     def set_soku(self, soku):
         self.soku = soku
@@ -85,6 +88,22 @@ class Jou_kou(object):
     def get_kou_bangou(self):
         return self.kou_bangou
 
+    def get_gou_list(self):
+        return self.gou_list
+
+    def set_zenkou(self, zenkou):
+        self.zenkou = zenkou
+
+    def set_jikou(self, jikou):
+        self.jikou = jikou
+
+    def get_zenkou(self):
+        return self.zenkou
+
+    def get_jikou(self):
+        return self.jikou
+
+
 #     def set_jou_bangou_tuple(self, jou_bangou_tuple):
 # #         d.dprint(jou_bangou_tuple)
 #         self.jou_bangou_tuple = jou_bangou_tuple
@@ -94,9 +113,6 @@ class Jou_kou(object):
 # #         d.dprint(jou_bangou_tuple)
 #         self.jou_bangou_tuple = \
 #                 (jou_bangou_tuple, self.kou_bangou, None)
-
-    def get_gou_list(self):
-        return self.gou_list
 
     def get_item_title(self):
         return self.item_title
