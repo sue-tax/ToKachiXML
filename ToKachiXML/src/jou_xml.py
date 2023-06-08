@@ -27,7 +27,24 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.6.1'
+__version__ = '0.6.3'
+
+# if __name__ == '__main__':
+# #     mei = '国税通則' # '0.6.1'
+# #     mei = '国税徴収' # '0.6.1'
+# #     mei = '所得税' # '0.6.2'
+# #     mei = '法人税' # '0.6.1'
+# #     mei = '相続税' # '0.6.3'
+# #     mei = '消費税' # '0.6.2'
+# #     mei = '地方税' # '0.6.1'
+#     mei = '地方法人税' # '0.6.1'
+# #     mei = '租税特別措置'  # '0.6.1' 0.5.1まではMemoryError
+# #     mei = '新型コロナ特例' # '0.6.2'
+# #     mei = '電子帳簿保存' # '0.6.1'
+# #     mei = '会社' # '0.6.1'
+# #     mei = '一般社団法人' # '0.6.1'
+# #     mei = '民' # '0.6.1' 規則なし
+#     Jou_xml.main_main(mei)
 
 
 class Jou_xml(object):
@@ -478,6 +495,9 @@ class Jou_xml(object):
             jou_bangou_tuple, paragraph):
 #         d.dprint_method_start()
         num = paragraph.get('Num')
+        if ':' in num:
+            nums = num.split(':')
+            num = nums[0]   # 暫定処理
         kou_bangou = int(num)
 #         d.dprint(jou_bangou_tuple)
 #         d.dprint(kou_bangou)
@@ -995,120 +1015,107 @@ class Jou_xml(object):
 #             eprint("num2tuple over")
         return tup
 
-if __name__ == '__main__':
-    folder = '.\\org'
-#     folder = '.\\data'
-    config.folder_name = folder
+    @classmethod
+    def main_main(cls, mei):
+        folder = '.\\org'
+    #     folder = '.\\data'
+        config.folder_name = folder
 
-    mei = '国税通則' # 済み__version__ = '0.5.2'
-#     mei = '国税徴収' # 済み__version__ = '0.6.0'
-#     mei = '所得税' # 済み__version__ = '0.5.0'
-#     mei = '法人税' # 済み__version__ = '0.5.0'
-#     mei = '相続税' # 済み__version__ = '0.6.1'
-#     mei = '消費税' # 済み__version__ = '0.5.1'
-#     mei = '地方税' # 済み__version__ = '0.5.0'
-#     mei = '地方法人税' # 済み__version__ = '0.5.0'
-#     mei = '租税特別措置'  # '0.5.2' 0.5.1まではMemoryError
-#     mei = '新型コロナ特例' # 済み__version__ = '0.5.0'
-#     mei = '電子帳簿保存' # 済み__version__ = '0.5.0'
-#     mei = '会社' # 済み__version__ = '0.5.0'
-#     mei = '一般社団法人' # 済み__version__ = '0.5.1'
-#     mei = '民' # 済み__version__ = '0.5.2'
+    #     jou_xml = Jou_xml('会社計算規則.xml')
+    #     jou_list = jou_xml.get_jou_list()
+    #     for jou_jou in jou_list:
+    #         save_file( \
+    #                 folder, \
+    #                 '会社計算規則', 0, jou_jou)
+    #     from ToKachi import kakou1_ji
+    #     kakou1_ji()
 
-#     jou_xml = Jou_xml('会社計算規則.xml')
-#     jou_list = jou_xml.get_jou_list()
-#     for jou_jou in jou_list:
-#         save_file( \
-#                 folder, \
-#                 '会社計算規則', 0, jou_jou)
-#     from ToKachi import kakou1_ji
-#     kakou1_ji()
+        jou_xml = Jou_xml(mei + '法.xml', mei, 0)
+        jou_list = jou_xml.get_jou_list()
+        index_list = jou_xml.get_index_list()
+        for jou_jou in jou_list:
+            save_file( \
+                    folder, \
+                    mei, 0, jou_jou)
 
-    jou_xml = Jou_xml(mei + '法.xml', mei, 0)
-    jou_list = jou_xml.get_jou_list()
-    index_list = jou_xml.get_index_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                mei, 0, jou_jou)
+    #     exit()
 
-#     exit()
-
-    appdx_list = jou_xml.create_appdxTable(
-            index_list, mei, 0)
-    for (title, text) in appdx_list:
-        file_name = mei + '法＿＿＿＿' + title + '.md'
+        appdx_list = jou_xml.create_appdxTable(
+                index_list, mei, 0)
+        for (title, text) in appdx_list:
+            file_name = mei + '法＿＿＿＿' + title + '.md'
+            file_name = os.path.join(folder, file_name)
+            with open(file_name,
+                mode='w',
+                encoding='UTF-8') as f:
+                f.write(text)
+        str_index = ''.join(index_list)
+        file_name = 'index' + mei + '法＿＿＿＿.md'
         file_name = os.path.join(folder, file_name)
         with open(file_name,
             mode='w',
             encoding='UTF-8') as f:
-            f.write(text)
-    str_index = ''.join(index_list)
-    file_name = 'index' + mei + '法＿＿＿＿.md'
-    file_name = os.path.join(folder, file_name)
-    with open(file_name,
-        mode='w',
-        encoding='UTF-8') as f:
-        f.write(str_index)
+            f.write(str_index)
 
-    jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
-    jou_list = jou_xml.get_jou_list()
-    index_list = jou_xml.get_index_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                mei, 1, jou_jou)
-    appdx_list = jou_xml.create_appdxTable(
-            index_list, mei, 0)
-    for (title, text) in appdx_list:
-        file_name = mei + '法施行＿令' + title + '.md'
+        jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
+        jou_list = jou_xml.get_jou_list()
+        index_list = jou_xml.get_index_list()
+        for jou_jou in jou_list:
+            save_file( \
+                    folder, \
+                    mei, 1, jou_jou)
+        appdx_list = jou_xml.create_appdxTable(
+                index_list, mei, 0)
+        for (title, text) in appdx_list:
+            file_name = mei + '法施行＿令' + title + '.md'
+            file_name = os.path.join(folder, file_name)
+            with open(file_name,
+                mode='w',
+                encoding='UTF-8') as f:
+                f.write(text)
+        str_index = ''.join(index_list)
+        file_name = 'index' + mei + '法施行＿令.md'
         file_name = os.path.join(folder, file_name)
         with open(file_name,
             mode='w',
             encoding='UTF-8') as f:
-            f.write(text)
-    str_index = ''.join(index_list)
-    file_name = 'index' + mei + '法施行＿令.md'
-    file_name = os.path.join(folder, file_name)
-    with open(file_name,
-        mode='w',
-        encoding='UTF-8') as f:
-        f.write(str_index)
+            f.write(str_index)
 
-    jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
-    jou_list = jou_xml.get_jou_list()
-    index_list = jou_xml.get_index_list()
-    for jou_jou in jou_list:
-        save_file( \
-                folder, \
-                mei, 2, jou_jou)
-    appdx_list = jou_xml.create_appdxTable(
-            index_list, mei, 0)
-    for (title, text) in appdx_list:
-        file_name = mei + '法施行規則' + title + '.md'
+        jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
+        jou_list = jou_xml.get_jou_list()
+        index_list = jou_xml.get_index_list()
+        for jou_jou in jou_list:
+            save_file( \
+                    folder, \
+                    mei, 2, jou_jou)
+        appdx_list = jou_xml.create_appdxTable(
+                index_list, mei, 0)
+        for (title, text) in appdx_list:
+            file_name = mei + '法施行規則' + title + '.md'
+            file_name = os.path.join(folder, file_name)
+            with open(file_name,
+                mode='w',
+                encoding='UTF-8') as f:
+                f.write(text)
+        str_index = ''.join(index_list)
+        file_name = 'index' + mei + '法施行規則.md'
         file_name = os.path.join(folder, file_name)
         with open(file_name,
             mode='w',
             encoding='UTF-8') as f:
-            f.write(text)
-    str_index = ''.join(index_list)
-    file_name = 'index' + mei + '法施行規則.md'
-    file_name = os.path.join(folder, file_name)
-    with open(file_name,
-        mode='w',
-        encoding='UTF-8') as f:
-        f.write(str_index)
+            f.write(str_index)
 
-    from ToKachi import kakou1_ji, \
-            kakou1_hou_rei, kakou2_hou_rei, \
-            kakou1_hou_ki, kakou2_hou_ki, \
-            kakou1_rei_ki, kakou2_rei_ki
+        from ToKachi import kakou1_ji, \
+                kakou1_hou_rei, kakou2_hou_rei, \
+                kakou1_hou_ki, kakou2_hou_ki, \
+                kakou1_rei_ki, kakou2_rei_ki
 
-    kakou1_ji()
-    kakou1_hou_rei()
-    kakou2_hou_rei()
-    kakou1_hou_ki()
-    kakou2_hou_ki()
-    kakou1_rei_ki()
-    kakou2_rei_ki()
+        kakou1_ji()
+        kakou1_hou_rei()
+        kakou2_hou_rei()
+        kakou1_hou_ki()
+        kakou2_hou_ki()
+        kakou1_rei_ki()
+        kakou2_rei_ki()
+
 

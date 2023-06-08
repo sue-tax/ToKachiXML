@@ -182,7 +182,8 @@ class Md(object):
         if self.joubun_bangou[2] == None:
             # 項
             list_guid = self.create_kou_guid(
-                    self.kou, self.kou.get_gou_list())
+                    self.kou, self.kou.get_gou_list(),
+                    False)
             list_bun.extend(list_guid)
         else:
             # 号
@@ -347,7 +348,8 @@ class Md(object):
                 jou_list)
         del jou_list
 
-        list_guid = self.create_kou_guid(kou, gou_list)
+        list_guid = self.create_kou_guid(kou, gou_list,
+                True)
         list_bun.extend(list_guid)
         list_bun.append(str_tag)
         file_bun = ''.join(list_bun)
@@ -355,7 +357,8 @@ class Md(object):
 #         d.dprint_method_end()
         return (self.file_name, file_bun)
 
-    def create_kou_guid(self, kou, gou_list):
+    def create_kou_guid(self, kou, gou_list,
+            full):
         list_bun = []
         if self.kubun == Md.kubunHou:
             kubun_mei = '法＿＿＿＿'
@@ -370,8 +373,19 @@ class Md(object):
                 (self.joubun_bangou[0], None, None),
                 self.soku)
         list_bun.append('[条(全)](' \
-                + jou_name + '_.md)\n\n')
-
+                + jou_name + '_.md)  ')
+        kou_name = \
+                TransNum.create_link_name(
+                self.zeihou_mei, kubun_mei,
+                (self.joubun_bangou[0],
+                        self.joubun_bangou[1], None),
+                self.soku)
+        if full:
+            list_bun.append('[項](' \
+                    + kou_name + '.md)\n\n')
+        else:
+            list_bun.append('[項(全)](' \
+                    + kou_name + '_.md)\n\n')
         list_full = []
         list_part = []
         zenkou = kou.get_zenkou()

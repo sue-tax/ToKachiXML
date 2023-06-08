@@ -42,7 +42,29 @@ from jou_yacc import jou_init, jou_parse
 from bun import Bun
 from md import Md
 
-__version__ = '0.6.1'
+
+__version__ = '0.6.3'
+
+if __name__ == '__main__':
+    from jou_xml import Jou_xml
+    mei = '国税通則' # '0.6.3'
+#     mei = '国税徴収' # '0.6.1'
+#     mei = '所得税' # '0.6.2'
+#     mei = '法人税' # '0.6.3'
+#     mei = '相続税' # '0.6.3'
+#     mei = '消費税' # '0.6.3'
+#     mei = '地方税' # '0.6.3'
+#     mei = '地方法人税' # '0.6.3'
+#     mei = '租税特別措置'  # '0.6.1' 0.5.1まではMemoryError
+#     mei = '新型コロナ特例' # '0.6.2'
+#     mei = '電子帳簿保存' # '0.6.1'
+#     mei = '会社' # '0.6.1'
+#     mei = '一般社団法人' # '0.6.1'
+#     mei = '民' # '0.6.1' 規則なし
+    Jou_xml.main_main(mei)
+    exit(0)
+
+
 
 
 font_name = "MS ゴシック"
