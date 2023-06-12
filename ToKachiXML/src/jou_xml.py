@@ -4,7 +4,6 @@ Created on 2023/05/13
 @author: sue-t
 '''
 
-# TODO タグの下に、次の条　や　前の項　など
 import c
 import d
 import e
@@ -18,6 +17,8 @@ from jou_kou import Jou_kou
 from jou_gou import Jou_gou
 from jou_koumoku import Jou_koumoku
 
+from table_struct_xml import Table_struct_xml
+
 from ToKachi import save_file
 
 from TransNum import TransNum
@@ -27,24 +28,8 @@ from lxml import etree
 # import xml.etree.ElementTree as ET
 # from xml import etree
 
-__version__ = '0.6.3'
+__version__ = '0.6.4'
 
-# if __name__ == '__main__':
-# #     mei = '国税通則' # '0.6.1'
-# #     mei = '国税徴収' # '0.6.1'
-# #     mei = '所得税' # '0.6.2'
-# #     mei = '法人税' # '0.6.1'
-# #     mei = '相続税' # '0.6.3'
-# #     mei = '消費税' # '0.6.2'
-# #     mei = '地方税' # '0.6.1'
-#     mei = '地方法人税' # '0.6.1'
-# #     mei = '租税特別措置'  # '0.6.1' 0.5.1まではMemoryError
-# #     mei = '新型コロナ特例' # '0.6.2'
-# #     mei = '電子帳簿保存' # '0.6.1'
-# #     mei = '会社' # '0.6.1'
-# #     mei = '一般社団法人' # '0.6.1'
-# #     mei = '民' # '0.6.1' 規則なし
-#     Jou_xml.main_main(mei)
 
 
 class Jou_xml(object):
@@ -868,127 +853,109 @@ class Jou_xml(object):
     def create_appdxTable(self,
             index_list, mei, kubun):
         # 別表はmdファイルを作るだけ
-
-        # TODO 所得税法別表３，５などが対応できない
-        # colspan, rawspanなどの解析が必要
-
-        appdxTables = self.tree.xpath('//AppdxTable')
+        appdx_tables = self.tree.xpath('//AppdxTable')
         appdx_list = []
-        if len(appdxTables) != 0:
+#         text_list = []
+        if len(appdx_tables) != 0:
             index_list.append('# 別表\n\n')
-        for appdxTable in appdxTables:
-            appd_titles = appdxTable.xpath(
+        for appdx_table in appdx_tables:
+            appd_titles = appdx_table.xpath(
                     "./AppdxTableTitle")
             str_title = TransNum.k2a(
                     appd_titles[0].text, True)
             text_list = [str_title, '\n']
             if kubun == 0:
-                file_name = mei + '法＿＿＿＿' \
-                        + str_title + '.md'
+                file_name2 = mei + '法＿＿＿＿' \
+                        + '＿' \
+                        + appd_titles[0].text + '.md'
             elif kubun == 1:
-                file_name = mei + '法施行＿令' \
-                        + str_title + '.md'
+                file_name2 = mei + '法施行＿令' \
+                        + '＿' \
+                        + appd_titles[0].text + '.md'
             else:
-                file_name = mei + '法施行規則' \
-                        + str_title + '.md'
+                file_name2 = mei + '法施行規則' \
+                        + '＿' \
+                        + appd_titles[0].text + '.md'
+            file_name = '＿' + appd_titles[0].text
             str_index = '[' + appd_titles[0].text \
-                    + '](' + file_name + ')\n\n'
+                    + '](' + file_name2 + ')\n\n'
             index_list.append(str_index)
-            # TODO 順番を考慮する必要あり
-            table_structs = appdxTable.xpath(
-                    './TableStruct')
-            if (len(table_structs) == 1):
-                text_list.append(table_structs[0].text)
-                tables = table_structs[0].xpath(
-                        './Table')
-                for table in tables:
-                    tableRows = table.xpath('TableRow')
-                    table_list = []
-                    tableRow = tableRows[0]
-                    tableColumns = tableRow.xpath(
-                            'TableColumn')
-                    table_list.append('\n\n|')
-                    row_list = [ '|' ]
-                    for tableColumn in tableColumns:
-                        sentences = tableColumn.xpath(
-                                './Sentence')
-                        for sentence in sentences:
-                            if sentence.text != None:
-                                table_list.append(
-                                        ' ' \
-                                        + sentence.text \
-                                        + ' |' )
-                            else:
-                                table_list.append(
-                                        '    |')
-                        row_list.append(' ---- |')
-                    table_list.append('\n')
-                    row_list.append('\n')
-                    table_list.extend(row_list)
-                    del row_list
-
-                    for tableRow in tableRows[1:]:
-                        tableColumns = tableRow.xpath('TableColumn')
-                        table_list.append('|')
-                        for tableColumn in tableColumns:
-                            sentences = tableColumn.xpath(
-                                    './Sentence')
-                            for sentence in sentences:
-                                if sentence.text != None:
-                                    table_list.append(' ')
-                                    table_list.append(
-                                            sentence.text)
-                                    table_list.append(' |')
-                                else:
-                                    # 上段が２つ合わせて、下段が1つ
-                                    table_list.append('    |')
-                        table_list.append('\n')
-                    text_list.extend(table_list)
-            items = appdxTable.xpath('.//Item')
-            for item in items:
-                titles = item.xpath('./ItemTitle')
-                if (len(titles) != 0) and \
-                         (titles[0].text != None):
-                    text_list.append(titles[0].text)
-                    text_list.append('　')
-                sentences = item.xpath(
-                        './ItemSentence/Sentence')
-                for sentence in sentences:
-                    text_list.append(sentence.text)
-                text_list.append('\n')
-                subitem1s = item.xpath('./Subitem1')
-                for subitem1 in subitem1s:
-                    text_list.append('　')
-                    titles = subitem1.xpath(
-                            './Subitem1Title')
-                    if (len(titles) != 0) and \
-                            (titles[0].text != None):
-                        text_list.append(titles[0].text)
-                        text_list.append('　')
-                    sentences = subitem1.xpath(
-                        './Subitem1Sentence/Sentence')
-                    for sentence in sentences:
-                        text_list.append(sentence.text)
-                    text_list.append('\n')
-                    subitem2s = subitem1.xpath(
-                            './Subitem2')
-                    for subitem2 in subitem2s:
-                        text_list.append('　　')
-                        titles = subitem2.xpath(
-                                './Subitem2Title')
-                        if (len(titles) != 0) and \
-                                 (titles[0].text != None):
-                            text_list.append(
-                                    titles[0].text)
-                            text_list.append('　')
-                        sentences = subitem2.xpath(
-                                './Subitem2Sentence/Sentence')
-                        for sentence in sentences:
-                            text_list.append(
-                                    sentence.text)
-                        text_list.append('\n')
+            table_structs = appdx_table. \
+                    xpath('./TableStruct')
+            for table_struct in table_structs:
+                table_struct_xml = Table_struct_xml(
+                        table_struct)
+                str_table_md = table_struct_xml. \
+                        create_str_md()
+                text_list.append(str_table_md)
             text = ''.join(text_list)
-            appdx_list.append((str_title, text))
+            appdx_list.append((file_name, text))
+
+        suppl_provision_appdx_tables = \
+                self.tree.xpath(
+                        '//SupplProvisionAppdxTable')
+        for suppl_provision_appdx_table in \
+                suppl_provision_appdx_tables:
+            appd_titles = suppl_provision_appdx_table.xpath(
+                    "./SupplProvisionAppdxTableTitle")
+            if len(appd_titles) != 0:
+                title = appd_titles[0].text
+                str_title = TransNum.k2a(
+                        title, True)
+                text_list = [str_title, '\n']
+            else:
+                title = "_"
+                str_title = " "
+                text_list = ['\n']
+            suppl_provisions = suppl_provision_appdx_table.xpath(
+                    './ancestor::SupplProvision')
+            # ================================
+#             print(suppl_provision_appdx_table)
+#             print(appd_titles)
+#             print(suppl_provisions)
+            # ================================
+            fusoku_name = suppl_provisions[0].attrib. \
+                    get("AmendLawNum")
+            if fusoku_name == None:
+                str_fusoku = "附則"
+            else:
+                index = fusoku_name.find("日")
+                # 漢数字を全角アラビア数字に
+                str_hizuke = fusoku_name[:index+1] \
+                        .replace('元', '一')
+                str_ara = TransNum.k2a(
+                        str_hizuke, True)
+                str_fusoku = "附則" + str_ara
+            if kubun == 0:
+                file_name2 = mei + '法＿＿＿＿' \
+                        + str_fusoku \
+                        + title + '.md'
+            elif kubun == 1:
+                file_name2 = mei + '法施行＿令' \
+                        + str_fusoku \
+                        + title + '.md'
+            else:
+                file_name2 = mei + '法施行規則' \
+                        + str_fusoku \
+                        + title + '.md'
+            file_name = str_fusoku + title
+#             str_index = '[' + appd_titles[0].text \
+#                     + '](' + file_name + ')\n\n'
+            str_index = '[' + str_fusoku + str_title \
+                    + '](' + file_name2 + ')\n\n'
+            index_list.append(str_index)
+            table_structs = suppl_provision_appdx_table. \
+                    xpath('./TableStruct')
+#             print(table_structs)
+            for table_struct in table_structs:
+                table_struct_xml = Table_struct_xml(
+                        table_struct)
+                str_table_md = table_struct_xml. \
+                        create_str_md()
+#                 print(str_table_md)
+                text_list.append(str_table_md)
+            text = ''.join(text_list)
+            appdx_list.append((file_name, text))
         return appdx_list
 
 
@@ -1016,7 +983,7 @@ class Jou_xml(object):
         return tup
 
     @classmethod
-    def main_main(cls, mei):
+    def main_main(cls, mei, file):
         folder = '.\\org'
     #     folder = '.\\data'
         config.folder_name = folder
@@ -1030,19 +997,18 @@ class Jou_xml(object):
     #     from ToKachi import kakou1_ji
     #     kakou1_ji()
 
-        jou_xml = Jou_xml(mei + '法.xml', mei, 0)
+#         jou_xml = Jou_xml(mei + '法.xml', mei, 0)
+        jou_xml = Jou_xml(file + '法.xml', mei, 0)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
         for jou_jou in jou_list:
             save_file( \
                     folder, \
                     mei, 0, jou_jou)
-
-    #     exit()
-
         appdx_list = jou_xml.create_appdxTable(
                 index_list, mei, 0)
         for (title, text) in appdx_list:
+#             file_name = file + '法＿＿＿＿' + title + '.md'
             file_name = mei + '法＿＿＿＿' + title + '.md'
             file_name = os.path.join(folder, file_name)
             with open(file_name,
@@ -1057,7 +1023,8 @@ class Jou_xml(object):
             encoding='UTF-8') as f:
             f.write(str_index)
 
-        jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
+#         jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
+        jou_xml = Jou_xml(file + '法施行令.xml', mei, 1)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
         for jou_jou in jou_list:
@@ -1067,6 +1034,7 @@ class Jou_xml(object):
         appdx_list = jou_xml.create_appdxTable(
                 index_list, mei, 0)
         for (title, text) in appdx_list:
+#             file_name = file + '法施行＿令' + title + '.md'
             file_name = mei + '法施行＿令' + title + '.md'
             file_name = os.path.join(folder, file_name)
             with open(file_name,
@@ -1081,7 +1049,8 @@ class Jou_xml(object):
             encoding='UTF-8') as f:
             f.write(str_index)
 
-        jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
+#         jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
+        jou_xml = Jou_xml(file + '法施行規則.xml', mei, 2)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
         for jou_jou in jou_list:
@@ -1091,6 +1060,7 @@ class Jou_xml(object):
         appdx_list = jou_xml.create_appdxTable(
                 index_list, mei, 0)
         for (title, text) in appdx_list:
+#             file_name = file + '法施行規則' + title + '.md'
             file_name = mei + '法施行規則' + title + '.md'
             file_name = os.path.join(folder, file_name)
             with open(file_name,
