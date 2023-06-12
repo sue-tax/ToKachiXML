@@ -863,7 +863,13 @@ class Jou_xml(object):
                     "./AppdxTableTitle")
             str_title = TransNum.k2a(
                     appd_titles[0].text, True)
-            text_list = [str_title, '\n']
+            related_article_nums = appdx_table.xpath(
+                    "./RelatedArticleNum")
+            if len(related_article_nums) != 0:
+                related = related_article_nums[0].text
+            else:
+                related = ''
+            text_list = [str_title, related, '\n']
             if kubun == 0:
                 file_name2 = mei + '法＿＿＿＿' \
                         + '＿' \
@@ -888,6 +894,51 @@ class Jou_xml(object):
                 str_table_md = table_struct_xml. \
                         create_str_md()
                 text_list.append(str_table_md)
+
+            items = appdx_table.xpath('.//Item')
+            for item in items:
+                titles = item.xpath('./ItemTitle')
+                if (len(titles) != 0) and \
+                         (titles[0].text != None):
+                    text_list.append(titles[0].text)
+                    text_list.append('　')
+                sentences = item.xpath(
+                        './ItemSentence/Sentence')
+                for sentence in sentences:
+                    text_list.append(sentence.text)
+                text_list.append('\n')
+                subitem1s = item.xpath('./Subitem1')
+                for subitem1 in subitem1s:
+                    text_list.append('　')
+                    titles = subitem1.xpath(
+                            './Subitem1Title')
+                    if (len(titles) != 0) and \
+                            (titles[0].text != None):
+                        text_list.append(titles[0].text)
+                        text_list.append('　')
+                    sentences = subitem1.xpath(
+                        './Subitem1Sentence/Sentence')
+                    for sentence in sentences:
+                        text_list.append(sentence.text)
+                    text_list.append('\n')
+                    subitem2s = subitem1.xpath(
+                            './Subitem2')
+                    for subitem2 in subitem2s:
+                        text_list.append('　　')
+                        titles = subitem2.xpath(
+                                './Subitem2Title')
+                        if (len(titles) != 0) and \
+                                 (titles[0].text != None):
+                            text_list.append(
+                                    titles[0].text)
+                            text_list.append('　')
+                        sentences = subitem2.xpath(
+                                './Subitem2Sentence/Sentence')
+                        for sentence in sentences:
+                            text_list.append(
+                                    sentence.text)
+                        text_list.append('\n')
+
             text = ''.join(text_list)
             appdx_list.append((file_name, text))
 
@@ -902,7 +953,14 @@ class Jou_xml(object):
                 title = appd_titles[0].text
                 str_title = TransNum.k2a(
                         title, True)
-                text_list = [str_title, '\n']
+                related_article_nums = \
+                        suppl_provision_appdx_table. \
+                        xpath("./RelatedArticleNum")
+                if len(related_article_nums) != 0:
+                    related = related_article_nums[0].text
+                else:
+                    related = ''
+                text_list = [str_title, related, '\n']
             else:
                 title = "_"
                 str_title = " "
@@ -954,6 +1012,50 @@ class Jou_xml(object):
                         create_str_md()
 #                 print(str_table_md)
                 text_list.append(str_table_md)
+            items = suppl_provision_appdx_table. \
+                    xpath('.//Item')
+            for item in items:
+                titles = item.xpath('./ItemTitle')
+                if (len(titles) != 0) and \
+                         (titles[0].text != None):
+                    text_list.append(titles[0].text)
+                    text_list.append('　')
+                sentences = item.xpath(
+                        './ItemSentence/Sentence')
+                for sentence in sentences:
+                    text_list.append(sentence.text)
+                text_list.append('\n')
+                subitem1s = item.xpath('./Subitem1')
+                for subitem1 in subitem1s:
+                    text_list.append('　')
+                    titles = subitem1.xpath(
+                            './Subitem1Title')
+                    if (len(titles) != 0) and \
+                            (titles[0].text != None):
+                        text_list.append(titles[0].text)
+                        text_list.append('　')
+                    sentences = subitem1.xpath(
+                        './Subitem1Sentence/Sentence')
+                    for sentence in sentences:
+                        text_list.append(sentence.text)
+                    text_list.append('\n')
+                    subitem2s = subitem1.xpath(
+                            './Subitem2')
+                    for subitem2 in subitem2s:
+                        text_list.append('　　')
+                        titles = subitem2.xpath(
+                                './Subitem2Title')
+                        if (len(titles) != 0) and \
+                                 (titles[0].text != None):
+                            text_list.append(
+                                    titles[0].text)
+                            text_list.append('　')
+                        sentences = subitem2.xpath(
+                                './Subitem2Sentence/Sentence')
+                        for sentence in sentences:
+                            text_list.append(
+                                    sentence.text)
+                        text_list.append('\n')
             text = ''.join(text_list)
             appdx_list.append((file_name, text))
         return appdx_list

@@ -10,6 +10,6 @@ configファイル
     2 messagebox.showinfo
     3 ログファイルへ dprintのみ
 '''
-__dprint_type__ = 1
+__dprint_type__ = 0
 
 __eprint_type__ = 2
