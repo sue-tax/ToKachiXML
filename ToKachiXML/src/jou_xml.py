@@ -1090,14 +1090,14 @@ class Jou_xml(object):
     #     folder = '.\\data'
         config.folder_name = folder
 
-    #     jou_xml = Jou_xml('会社計算規則.xml')
-    #     jou_list = jou_xml.get_jou_list()
-    #     for jou_jou in jou_list:
-    #         save_file( \
-    #                 folder, \
-    #                 '会社計算規則', 0, jou_jou)
-    #     from ToKachi import kakou1_ji
-    #     kakou1_ji()
+#         jou_xml = Jou_xml('会社計算規則.xml')
+#         jou_list = jou_xml.get_jou_list()
+#         for jou_jou in jou_list:
+#             save_file( \
+#                     folder, \
+#                     '会社計算規則', 0, jou_jou)
+#         from ToKachi import kakou1_ji
+#         kakou1_ji()
 
 #         jou_xml = Jou_xml(mei + '法.xml', mei, 0)
         jou_xml = Jou_xml(file + '法.xml', mei, 0)
@@ -1134,7 +1134,7 @@ class Jou_xml(object):
                     folder, \
                     mei, 1, jou_jou)
         appdx_list = jou_xml.create_appdxTable(
-                index_list, mei, 0)
+                index_list, mei, 1)
         for (title, text) in appdx_list:
 #             file_name = file + '法施行＿令' + title + '.md'
             file_name = mei + '法施行＿令' + title + '.md'
@@ -1151,7 +1151,6 @@ class Jou_xml(object):
             encoding='UTF-8') as f:
             f.write(str_index)
 
-#         jou_xml = Jou_xml(mei + '法施行規則.xml', mei, 2)
         jou_xml = Jou_xml(file + '法施行規則.xml', mei, 2)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
@@ -1160,7 +1159,7 @@ class Jou_xml(object):
                     folder, \
                     mei, 2, jou_jou)
         appdx_list = jou_xml.create_appdxTable(
-                index_list, mei, 0)
+                index_list, mei, 2)
         for (title, text) in appdx_list:
 #             file_name = file + '法施行規則' + title + '.md'
             file_name = mei + '法施行規則' + title + '.md'
