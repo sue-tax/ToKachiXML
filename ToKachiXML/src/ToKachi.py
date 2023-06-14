@@ -48,7 +48,7 @@ __version__ = '0.6.4'
 
 if __name__ == '__main__':
     from jou_xml import Jou_xml
-    mei = '国税通則' # '0.6.3'
+    mei = '国税通則' # '0.6.4'
 #     mei = '国税徴収' # '0.6.3'
 #     mei = '所得税' # '0.6.4'
 #     mei = '法人税' # '0.6.4'

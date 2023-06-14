@@ -1099,7 +1099,6 @@ class Jou_xml(object):
 #         from ToKachi import kakou1_ji
 #         kakou1_ji()
 
-#         jou_xml = Jou_xml(mei + '法.xml', mei, 0)
         jou_xml = Jou_xml(file + '法.xml', mei, 0)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
@@ -1125,7 +1124,6 @@ class Jou_xml(object):
             encoding='UTF-8') as f:
             f.write(str_index)
 
-#         jou_xml = Jou_xml(mei + '法施行令.xml', mei, 1)
         jou_xml = Jou_xml(file + '法施行令.xml', mei, 1)
         jou_list = jou_xml.get_jou_list()
         index_list = jou_xml.get_index_list()
