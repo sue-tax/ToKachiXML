@@ -853,7 +853,9 @@ class Jou_xml(object):
     def create_appdxTable(self,
             index_list, mei, kubun):
         # 別表はmdファイルを作るだけ
+        d.dprint_method_start()
         appdx_tables = self.tree.xpath('//AppdxTable')
+        d.dprint(appdx_tables)
         appdx_list = []
 #         text_list = []
         if len(appdx_tables) != 0:
@@ -863,6 +865,9 @@ class Jou_xml(object):
                     "./AppdxTableTitle")
             str_title = TransNum.k2a(
                     appd_titles[0].text, True)
+            d.dprint(str_title)
+            file_title = str_title. \
+                    replace('　', '_')
             related_article_nums = appdx_table.xpath(
                     "./RelatedArticleNum")
             if len(related_article_nums) != 0:
@@ -873,16 +878,20 @@ class Jou_xml(object):
             if kubun == 0:
                 file_name2 = mei + '法＿＿＿＿' \
                         + '＿' \
-                        + appd_titles[0].text + '.md'
+                        + file_title + '.md'
+#                         + appd_titles[0].text + '.md'
             elif kubun == 1:
                 file_name2 = mei + '法施行＿令' \
                         + '＿' \
-                        + appd_titles[0].text + '.md'
+                        + file_title + '.md'
+#                         + appd_titles[0].text + '.md'
             else:
                 file_name2 = mei + '法施行規則' \
                         + '＿' \
-                        + appd_titles[0].text + '.md'
-            file_name = '＿' + appd_titles[0].text
+                        + file_title + '.md'
+#                         + appd_titles[0].text + '.md'
+            file_name = '＿' + file_title
+#             file_name = '＿' + appd_titles[0].text
             str_index = '[' + appd_titles[0].text \
                     + '](' + file_name2 + ')\n\n'
             index_list.append(str_index)
@@ -953,6 +962,8 @@ class Jou_xml(object):
                 title = appd_titles[0].text
                 str_title = TransNum.k2a(
                         title, True)
+                file_title = str_title. \
+                        replace('　', '_')
                 related_article_nums = \
                         suppl_provision_appdx_table. \
                         xpath("./RelatedArticleNum")
@@ -964,6 +975,7 @@ class Jou_xml(object):
             else:
                 title = "_"
                 str_title = " "
+                file_title = "_"
                 text_list = ['\n']
             suppl_provisions = suppl_provision_appdx_table.xpath(
                     './ancestor::SupplProvision')
@@ -987,16 +999,20 @@ class Jou_xml(object):
             if kubun == 0:
                 file_name2 = mei + '法＿＿＿＿' \
                         + str_fusoku \
-                        + title + '.md'
+                        + file_title + '.md'
+#                         + title + '.md'
             elif kubun == 1:
                 file_name2 = mei + '法施行＿令' \
                         + str_fusoku \
-                        + title + '.md'
+                        + file_title + '.md'
+#                         + title + '.md'
             else:
                 file_name2 = mei + '法施行規則' \
                         + str_fusoku \
-                        + title + '.md'
-            file_name = str_fusoku + title
+                        + file_title + '.md'
+#                         + title + '.md'
+            file_name = str_fusoku + file_title
+#             file_name = str_fusoku + title
 #             str_index = '[' + appd_titles[0].text \
 #                     + '](' + file_name + ')\n\n'
             str_index = '[' + str_fusoku + str_title \
@@ -1058,6 +1074,7 @@ class Jou_xml(object):
                         text_list.append('\n')
             text = ''.join(text_list)
             appdx_list.append((file_name, text))
+        d.dprint_method_end()
         return appdx_list
 
 
@@ -1090,6 +1107,7 @@ class Jou_xml(object):
     #     folder = '.\\data'
         config.folder_name = folder
 
+#         from ToKachi import kakou1_ji
 #         jou_xml = Jou_xml('会社計算規則.xml')
 #         jou_list = jou_xml.get_jou_list()
 #         for jou_jou in jou_list:
@@ -1098,6 +1116,25 @@ class Jou_xml(object):
 #                     '会社計算規則', 0, jou_jou)
 #         from ToKachi import kakou1_ji
 #         kakou1_ji()
+
+#         from ToKachi import kakou1_ji
+#         jou_xml = Jou_xml(
+#             '小規模企業共済法の一部を改正する法律の施行に伴う経過措置に関する政令.xml',
+#             '小規模企業共済_経過措置',1)
+#         jou_list = jou_xml.get_jou_list()
+#         for jou_jou in jou_list:
+#             save_file( \
+#                     folder, \
+#                     '小規模企業共済法の一部を改正する法律の施行に伴う経過措置に関する政令', 1, jou_jou)
+#         jou_xml = Jou_xml(
+#             '小規模企業共済法の一部を改正する法律の施行に伴う経過措置に関する省令.xml',
+#             '小規模企業共済_経過措置',2)
+#         jou_list = jou_xml.get_jou_list()
+#         for jou_jou in jou_list:
+#             save_file( \
+#                     folder, \
+#                     '小規模企業共済法の一部を改正する法律の施行に伴う経過措置に関する省令',
+#                      2, jou_jou)
 
         jou_xml = Jou_xml(file + '法.xml', mei, 0)
         jou_list = jou_xml.get_jou_list()
@@ -1186,5 +1223,6 @@ class Jou_xml(object):
         kakou2_hou_ki()
         kakou1_rei_ki()
         kakou2_rei_ki()
+
 
 
