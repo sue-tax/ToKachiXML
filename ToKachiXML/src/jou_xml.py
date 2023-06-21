@@ -47,7 +47,26 @@ class Jou_xml(object):
         articles = tree.xpath('//MainProvision//Article')
         self.proc_article("＿",  # "本則",
                  jou_list, articles)
-        index_list = [ '[TOC]\n\n# 本則\n\n' ]
+        index_list = []
+        if kubun != 0:
+            index_list.append('[')
+            index_list.append(mei)
+            index_list.append('法　　　　目次](index')
+            index_list.append(mei)
+            index_list.append('法＿＿＿＿.md)\n\n')
+        if kubun != 1:
+            index_list.append('[')
+            index_list.append(mei)
+            index_list.append('法施行令　目次](index')
+            index_list.append(mei)
+            index_list.append('法施行＿令.md)\n\n')
+        if kubun != 2:
+            index_list.append('[')
+            index_list.append(mei)
+            index_list.append('法施行規則目次](index')
+            index_list.append(mei)
+            index_list.append('法施行規則.md)\n\n')
+        index_list.append('[TOC]\n\n# 本則\n\n' )
         main_provision = tree.xpath('//MainProvision')
         self.proc_index(main_provision[0],
                 "＿", index_list, mei, kubun)
@@ -1223,6 +1242,7 @@ class Jou_xml(object):
         kakou2_hou_ki()
         kakou1_rei_ki()
         kakou2_rei_ki()
+
 
 
 

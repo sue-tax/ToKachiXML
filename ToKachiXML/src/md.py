@@ -191,12 +191,15 @@ class Md(object):
                     self.gou)
             list_bun.extend(list_guid)
 
-        str_tag = self.sakusei_tag(
-                self.zeihou_mei, kubun_mei,
-                self.soku, self.part, self.midashi,
-                jou_list)
+#         str_tag = self.sakusei_tag(
+#                 self.zeihou_mei, kubun_mei,
+#                 self.soku, self.part, self.midashi,
+#                 jou_list)
         del jou_list
-        list_bun.append(str_tag)
+#         list_bun.append(str_tag)
+        str_index_guid = Md.create_index_guid(
+                self.zeihou_mei, self.kubun)
+        list_bun.append(str_index_guid)
         self.file_bun = ''.join(list_bun)
         del list_bun
 
@@ -239,11 +242,11 @@ class Md(object):
                 honbun = gou.get_honbun()
                 list_bun.append(honbun)
         list_bun.append('\n\n')
-        str_tag = cls.sakusei_tag(
-                zeihou_mei, kubun_mei,
-                jou_jou.soku, jou_jou.kubun,
-                jou_jou.midashi,
-                jou_list)
+#         str_tag = cls.sakusei_tag(
+#                 zeihou_mei, kubun_mei,
+#                 jou_jou.soku, jou_jou.kubun,
+#                 jou_jou.midashi,
+#                 jou_list)
         del jou_list
 
         zenjou = jou_jou.get_zenjou()
@@ -307,7 +310,10 @@ class Md(object):
         list_bun.extend(kou_list_part)
         list_bun.append('\n\n')
 
-        list_bun.append(str_tag)
+#         list_bun.append(str_tag)
+        str_index_guid = cls.create_index_guid(
+                zeihou_mei, kubun)
+        list_bun.append(str_index_guid)
 #         d.dprint(list_bun)
         file_bun = ''.join(list_bun)
         del list_bun
@@ -342,20 +348,41 @@ class Md(object):
             honbun = gou.get_honbun()
             list_bun.append(honbun)
         list_bun.append('\n\n')
-        str_tag = self.sakusei_tag(
-                self.zeihou_mei, kubun_mei,
-                self.soku, self.part, self.midashi,
-                jou_list)
+#         str_tag = self.sakusei_tag(
+#                 self.zeihou_mei, kubun_mei,
+#                 self.soku, self.part, self.midashi,
+#                 jou_list)
         del jou_list
 
         list_guid = self.create_kou_guid(kou, gou_list,
                 True)
         list_bun.extend(list_guid)
-        list_bun.append(str_tag)
+        str_index_guid = self.create_index_guid(
+                self.zeihou_mei, self.kubun)
+        list_bun.append(str_index_guid)
+#         list_bun.append(str_tag)
         file_bun = ''.join(list_bun)
         del list_bun
 #         d.dprint_method_end()
         return (self.file_name, file_bun)
+
+    @classmethod
+    def create_index_guid(cls, zeihou_mei, kubun):
+        '''indexファイルへのハイパーリンク'''
+        list_index = ['[目次](index', zeihou_mei]
+        if kubun == Md.kubunHou:
+            kubun_mei = '法＿＿＿＿'
+        elif kubun == Md.kubunRei:
+            kubun_mei = '法施行＿令'
+        else:
+            assert(kubun == Md.kubunKi)
+            kubun_mei = '法施行規則'
+        list_index.append(kubun_mei)
+        list_index.append('.md)\n\n')
+        str_index = ''.join(list_index)
+        del list_index
+        return str_index
+
 
     def create_kou_guid(self, kou, gou_list,
             full):
