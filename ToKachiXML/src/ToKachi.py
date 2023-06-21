@@ -42,7 +42,47 @@ from jou_yacc import jou_init, jou_parse
 from bun import Bun
 from md import Md
 
-__version__ = '0.6.1'
+
+# __version__ = '0.6.4'
+# 0.6.4 表対応の強化
+# __version__ = '0.6.5'
+# 別表名に空白が入る場合に対応 別表第一　（第二条、第四条関係）
+__version__ = '0.7.0'
+# 基本的なリンクの追加、タグの廃止
+# 条（全）などの作成、色付け機能を別ソフトへ
+
+if __name__ == '__main__':
+    from jou_xml import Jou_xml
+#     mei = '国税通則' # '0.6.4'
+#     mei = '国税徴収' # '0.7.0'
+#     mei = '所得税' # '0.6.5'
+#     mei = '法人税' # '0.6.4'
+#     mei = '相続税' # '0.6.4'
+
+#     file = '相続税_令和６年１月_' # '0.6.4'
+#     mei = '相続税' # '0.6.4'
+
+#     mei = '消費税' # '0.6.4'
+
+#     file = '消費税_令和５年６月_' # '0.6.4'
+#     mei = '消費税'
+
+#     mei = '地方税' # '0.6.4'
+#     mei = '地方法人税' # '0.6.3'
+#     mei = '租税特別措置'  # '0.6.5' 0.5.1まではMemoryError
+#     mei = '新型コロナ特例' # '0.7.0'
+    mei = '電子帳簿保存' # '0.7.0' 政令なし
+#     mei = '会社' # '0.6.4'　計算規則あり
+#     mei = '一般社団法人' # '0.6.3'
+#     mei = '民' # '0.6.4' 規則なし
+#     mei = '小規模企業共済' # '0.6.5' 経過措置あり
+
+    file = mei
+
+    Jou_xml.main_main(mei, file)
+    exit(0)
+
+
 
 
 font_name = "MS ゴシック"
@@ -417,7 +457,8 @@ def divide_kougou():
     list_log.append("次に、加工１を実行してください。\n")
     str_log = ''.join(list_log)
     del list_log
-    set_log(str_log)
+#     set_log(str_log)
+    print(str_log)
     return
 
 
@@ -654,7 +695,8 @@ def kakou1():
         list_log.append(
                 '続けて、加工２を実行してください。\n')
     str_log = ''.join(list_log)
-    set_log(str_log)
+#     set_log(str_log)
+    print(str_log)
     d.dprint_name("hou_rei_dict", hou_rei_dict)
     d.dprint_name("hou_ki_dict", hou_ki_dict)
     d.dprint_name("rei_ki_dict", rei_ki_dict)
@@ -721,11 +763,11 @@ def kakou1_hou_rei():
     hou_rei_dict = {}
 #     hou_ki_dict = {}
 #     rei_ki_dict = {}
-#     if len(files):
-#         list_log = [ '加工１を行ないました。\n' ]
-#     else:
-#         list_log = [ '加工１を行なうファイルが' \
-#                 'ありませんでした。\n' ]
+    if len(files):
+        list_log = [ '加工１を行ないました。\n' ]
+    else:
+        list_log = [ '加工１を行なうファイルが' \
+                'ありませんでした。\n' ]
     for file_name in files:
         if os.path.isdir(os.path.join(
                 config.folder_name, file_name)):
@@ -794,7 +836,11 @@ def kakou1_hou_rei():
                 d.dprint("===================")
                 continue
 #                     assert(False)
-#         list_log.append('\t{}\n'.format(file_name))
+        list_log.append('\t{}\n'.format(file_name))
+    str_log = ''.join(list_log)
+    del list_log
+#     set_log(str_log)
+    print(str_log)
     d.dprint_name("hou_rei_dict", hou_rei_dict)
 #     d.dprint_name("hou_ki_dict", hou_ki_dict)
 #     d.dprint_name("rei_ki_dict", rei_ki_dict)
@@ -810,11 +856,11 @@ def kakou1_hou_ki():
     files = os.listdir(config.folder_name)
     global hou_ki_dict
     hou_ki_dict = {}
-#     if len(files):
-#         list_log = [ '加工１を行ないました。\n' ]
-#     else:
-#         list_log = [ '加工１を行なうファイルが' \
-#                 'ありませんでした。\n' ]
+    if len(files):
+        list_log = [ '加工１を行ないました。\n' ]
+    else:
+        list_log = [ '加工１を行なうファイルが' \
+                'ありませんでした。\n' ]
     for file_name in files:
         if os.path.isdir(os.path.join(
                 config.folder_name, file_name)):
@@ -893,7 +939,11 @@ def kakou1_hou_ki():
 #                 d.dprint("===================")
 #                 continue
 #                     assert(False)
-#         list_log.append('\t{}\n'.format(file_name))
+        list_log.append('\t{}\n'.format(file_name))
+    str_log = ''.join(list_log)
+    del list_log
+#     set_log(str_log)
+    print(str_log)
     d.dprint_name("hou_ki_dict", hou_ki_dict)
 #     d.dprint_name("rei_ki_dict", rei_ki_dict)
     d.dprint_method_end()
@@ -908,11 +958,11 @@ def kakou1_rei_ki():
     files = os.listdir(config.folder_name)
     global rei_ki_dict
     rei_ki_dict = {}
-#     if len(files):
-#         list_log = [ '加工１を行ないました。\n' ]
-#     else:
-#         list_log = [ '加工１を行なうファイルが' \
-#                 'ありませんでした。\n' ]
+    if len(files):
+        list_log = [ '加工１を行ないました。\n' ]
+    else:
+        list_log = [ '加工１を行なうファイルが' \
+                'ありませんでした。\n' ]
     for file_name in files:
         if os.path.isdir(os.path.join(
                 config.folder_name, file_name)):
@@ -971,7 +1021,11 @@ def kakou1_rei_ki():
                             ref_pair[0], ref_pair[2], ref_pair[3]] \
                             = [(joubun_mei,
                             bun.joubun_bangou)]
-#         list_log.append('\t{}\n'.format(file_name))
+        list_log.append('\t{}\n'.format(file_name))
+    str_log = ''.join(list_log)
+    del list_log
+#     set_log(str_log)
+    print(str_log)
     d.dprint_name("rei_ki_dict", rei_ki_dict)
     d.dprint_method_end()
     return
@@ -1013,12 +1067,12 @@ def kakou2():
                 joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
-            list_log.append("\t【{}】などに対応する" \
-                    "\n\t\tファイル【{}】" \
-                    "が見つかりません、または、" \
-                    "オープンに失敗しました。\n" \
-                    "\t\t違う法令の可能性があります。\n". \
-                    format(value_list[0][0], file_name))
+#             list_log.append("\t【{}】などに対応する" \
+#                     "\n\t\tファイル【{}】" \
+#                     "が見つかりません、または、" \
+#                     "オープンに失敗しました。\n" \
+#                     "\t\t違う法令の可能性があります。\n". \
+#                     format(value_list[0][0], file_name))
             continue
 #         list_log.append("\t{}\n".format(file_name))
         bun = Bun.md_to_bun(md)
@@ -1181,7 +1235,8 @@ def kakou2():
         del sort_list
     str_log = ''.join(list_log)
     del list_log
-    set_log(str_log)
+#     set_log(str_log)
+    print(str_log)
     d.dprint_method_end()
     return
 
@@ -1196,7 +1251,7 @@ def kakou2_hou_rei():
     # 消費税法２①八の中の「財務省令で定める」は
     # 消費税法施行規則２①に対応することを示している
 
-#     list_log = [ '加工２を行ないました。\n' ]
+    list_log = [ '加工２を行ないました。\n' ]
 
         # dict_key = (bun.kubun_mei, bun.zeihou_mei,
         #         md.soku,
@@ -1210,12 +1265,12 @@ def kakou2_hou_rei():
                 joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
-#             list_log.append("\t【{}】などに対応する" \
-#                     "\n\t\tファイル【{}】" \
-#                     "が見つかりません、または、" \
-#                     "オープンに失敗しました。\n" \
-#                     "\t\t違う法令の可能性があります。\n". \
-#                     format(value_list[0][0], file_name))
+            list_log.append("\t【{}】などに対応する" \
+                    "\n\t\tファイル【{}】" \
+                    "が見つかりません、または、" \
+                    "オープンに失敗しました。\n" \
+                    "\t\t違う法令の可能性があります。\n". \
+                    format(value_list[0][0], file_name))
             continue
         bun = Bun.md_to_bun(md)
         # key のソートがNoneでエラー
@@ -1245,24 +1300,25 @@ def kakou2_hou_rei():
         if log_msg == None:
             md.set_file_bun(bun.kakou_bun)
             md.save()
-#             list_log.append('\t成功　')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
+            list_log.append('\t成功　')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
         else:
-#             list_log.append('\t失敗　')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
-#             list_log.append('\t\t')
-#             list_log.extend(log_msg)
+            list_log.append('\t失敗　')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
+            list_log.append('\t\t')
+            list_log.extend(log_msg)
             del log_msg
-#             for value in sort_list:
-#                 list_log.append('\t\t\t{}\n'. \
-#                         format(value[0]))
+            for value in sort_list:
+                list_log.append('\t\t\t{}\n'. \
+                        format(value[0]))
         del sort_list
 #         del sort_list
-#     str_log = ''.join(list_log)
-#     del list_log
+    str_log = ''.join(list_log)
+    del list_log
 #     set_log(str_log)
+    print(str_log)
     del hou_rei_dict
     d.dprint_method_end()
     return
@@ -1271,7 +1327,7 @@ def kakou2_hou_ki():
     # 除外リスト処理を検討
     d.dprint_method_start()
     global hou_ki_dict
-#     list_log = [ '加工２を行ないました。\n' ]
+    list_log = [ '加工２を行ないました。\n' ]
     for key_tuple, value_list in hou_ki_dict.items():
         file_name = Md.create_file_name(
                 zeihou_mei=key_tuple[0],
@@ -1280,14 +1336,14 @@ def kakou2_hou_ki():
                 joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
-#             list_log.append("\t【{}】などに対応する" \
-#                     "\n\t\tファイル【{}】" \
-#                     "が見つかりません、または、" \
-#                     "オープンに失敗しました。\n" \
-#                     "\t\t違う法令の可能性があります。\n". \
-#                     format(value_list[0][0], file_name))
+            list_log.append("\t【{}】などに対応する" \
+                    "\n\t\tファイル【{}】" \
+                    "が見つかりません、または、" \
+                    "オープンに失敗しました。\n" \
+                    "\t\t違う法令の可能性があります。\n". \
+                    format(value_list[0][0], file_name))
             continue
-#         list_log.append("\t{}\n".format(file_name))
+        list_log.append("\t{}\n".format(file_name))
         bun = Bun.md_to_bun(md)
         zero_list = []  # 号のNoneを省く
         for value in value_list:
@@ -1313,20 +1369,24 @@ def kakou2_hou_ki():
         if log_msg == None:
             md.set_file_bun(bun.kakou_bun)
             md.save()
-#             list_log.append('\t成功　')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
+            list_log.append('\t成功　')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
         else:
-#             list_log.append('\t失敗　')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
-#             list_log.append('\t\t')
-#             list_log.extend(log_msg)
+            list_log.append('\t失敗　')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
+            list_log.append('\t\t')
+            list_log.extend(log_msg)
             del log_msg
-#             for value in sort_list:
-#                 list_log.append('\t\t\t{}\n'. \
-#                         format(value[0]))
+            for value in sort_list:
+                list_log.append('\t\t\t{}\n'. \
+                        format(value[0]))
         del sort_list
+    str_log = ''.join(list_log)
+    del list_log
+#     set_log(str_log)
+    print(str_log)
     del hou_ki_dict
     d.dprint_method_end()
     return
@@ -1334,6 +1394,7 @@ def kakou2_hou_ki():
 def kakou2_rei_ki():
     # 除外リスト処理を検討
     d.dprint_method_start()
+    list_log = []
     global rei_ki_dict
     for key_tuple, value_list in rei_ki_dict.items():
         file_name = Md.create_file_name(
@@ -1343,12 +1404,12 @@ def kakou2_rei_ki():
                 joubun_bangou=key_tuple[2])
         md = Md.load(config.folder_name, file_name)
         if md == None:
-#             list_log.append("\t【{}】などに対応する" \
-#                     "\n\t\tファイル【{}】" \
-#                     "が見つかりません、または、" \
-#                     "オープンに失敗しました。\n" \
-#                     "\t\t違う法令の可能性があります。\n". \
-#                     format(value_list[0][0], file_name))
+            list_log.append("\t【{}】などに対応する" \
+                    "\n\t\tファイル【{}】" \
+                    "が見つかりません、または、" \
+                    "オープンに失敗しました。\n" \
+                    "\t\t違う法令の可能性があります。\n". \
+                    format(value_list[0][0], file_name))
             continue
         bun = Bun.md_to_bun(md)
         zero_list = []  # 号のNoneを省く
@@ -1375,23 +1436,24 @@ def kakou2_rei_ki():
         if log_msg == None:
             md.set_file_bun(bun.kakou_bun)
             md.save()
-#             list_log.append('\t成功')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
+            list_log.append('\t成功')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
         else:
-#             list_log.append('\t失敗')
-#             list_log.append(os.path.basename(md.file_name))
-#             list_log.append('\n')
-#             list_log.append('\t\t')
-#             list_log.extend(log_msg)
+            list_log.append('\t失敗')
+            list_log.append(os.path.basename(md.file_name))
+            list_log.append('\n')
+            list_log.append('\t\t')
+            list_log.extend(log_msg)
             del log_msg
-#             for value in sort_list:
-#                 list_log.append('\t\t\t{}\n'. \
-#                         format(value[0]))
+            for value in sort_list:
+                list_log.append('\t\t\t{}\n'. \
+                        format(value[0]))
         del sort_list
-#     str_log = ''.join(list_log)
-#     del list_log
+    str_log = ''.join(list_log)
+    del list_log
 #     set_log(str_log)
+    print(str_log)
     del rei_ki_dict
     d.dprint_method_end()
     return
@@ -1459,7 +1521,8 @@ def rename_file():
     del out_file
     list_log.append('項号分割を実行してください。\n')
     str_log = ''.join(list_log)
-    set_log(str_log)
+#     set_log(str_log)
+    print(str_log)
     return
 
 
@@ -1495,10 +1558,11 @@ def full_process():
     return
 
 def set_log(str_log):
-    config.form_log.configure(state=NORMAL)
-    config.form_log.insert("end", str_log)
-    config.form_log.see("end")
-    config.form_log.configure(state=DISABLED)
+#     config.form_log.configure(state=NORMAL)
+#     config.form_log.insert("end", str_log)
+#     config.form_log.see("end")
+#     config.form_log.configure(state=DISABLED)
+    print(str_log)
 
 
 def shuryou():
