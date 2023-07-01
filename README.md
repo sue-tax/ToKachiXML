@@ -11,8 +11,8 @@
 
 ダウンロード後に、解凍して下さい。
 
-租税特別措置法と地方税法は、masterブランチの下のToKachiXMLにあります。
-https://github.com/sue-tax/ToKachiXML/tree/master/ToKachiXML
+~~租税特別措置法と地方税法は、masterブランチの下のToKachiXMLにあります。~~
+~~https://github.com/sue-tax/ToKachiXML/tree/master/ToKachiXML~~
 
 租税特別措置法は、解凍後のファイル数が65,536を超えるので、解凍ソフトによっては全部を解凍できないことがあります。
 
