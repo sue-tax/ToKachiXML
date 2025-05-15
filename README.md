@@ -1,5 +1,7 @@
 # ToKachiXML
 
+*所得税法_令和８年１月 は正しくありません*
+
 [e-Gov法令検索](https://elaws.e-gov.go.jp/)からダウンロードしたXMLデータから、ハイパーリンクの設定をしたマークダウン・ファイルを作成するプログラムです。
 
 ~~[obsidian](https://obsidian.md/)を用いる場合は、[タグペイン](https://publish.obsidian.md/help-ja/%E3%83%97%E3%83%A9%E3%82%B0%E3%82%A4%E3%83%B3/%E3%82%BF%E3%82%B0%E3%83%9A%E3%82%A4%E3%83%B3)を使うと便利です。~~
